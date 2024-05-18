@@ -1,0 +1,4 @@
+Epoch 1, Train Loss: 102914.34216308594
+Epoch 1, Validation Loss: 62679.66786193848
+Epoch 1, Train Accuracy: 23.499568221070813
+Epoch 1, Validation Accuracy: 12.165371329879102

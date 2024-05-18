@@ -1,0 +1,4 @@
+Epoch 8, Train Loss: 41278.593923568726
+Epoch 8, Validation Loss: 53819.0322265625
+Epoch 8, Train Accuracy: 66.31044905008636
+Epoch 8, Validation Accuracy: 18.696027633851468
