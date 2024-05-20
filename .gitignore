@@ -1,1 +1,5 @@
 /data/
+/logs/
+/models/
+
+*.DS_Store

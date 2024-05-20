@@ -3,12 +3,10 @@ data:
   batch_size: 32
   num_classes: 32
   view:
-    - f
     - r
   res:
     - f
   background:
-    - grey
     - forest
 
 model:

@@ -4,9 +4,16 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/data" />
       <excludeFolder url="file://$MODULE_DIR$/logs/forest_f_f" />
+      <excludeFolder url="file://$MODULE_DIR$/logs/forest_r_f" />
+      <excludeFolder url="file://$MODULE_DIR$/logs/forest_r_f/cue_conflict_meadow_f_f" />
+      <excludeFolder url="file://$MODULE_DIR$/logs/grey_f_f/cue_conflict_meadow_f_f" />
       <excludeFolder url="file://$MODULE_DIR$/logs/grey_r_f" />
       <excludeFolder url="file://$MODULE_DIR$/models/forest_f_f" />
+      <excludeFolder url="file://$MODULE_DIR$/models/forest_r_f" />
       <excludeFolder url="file://$MODULE_DIR$/models/grey_r_f" />
+      <excludeFolder url="file://$MODULE_DIR$/models/mixed_r_f_10" />
+      <excludeFolder url="file://$MODULE_DIR$/models/mixed_r_f_20" />
+      <excludeFolder url="file://$MODULE_DIR$/models/mixed_r_f_25" />
     </content>
     <orderEntry type="jdk" jdkName="torch-arm64" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
