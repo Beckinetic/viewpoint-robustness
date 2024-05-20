@@ -1,6 +1,7 @@
 /data/
 /logs/
 /models/
+/plots/
 /.idea/
 
 *.DS_Store
