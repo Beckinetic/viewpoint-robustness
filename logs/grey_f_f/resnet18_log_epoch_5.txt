@@ -1,4 +1,4 @@
-Epoch 5, Train Loss: 56881.26065444946
-Epoch 5, Validation Loss: 13987.818073272705
-Epoch 5, Train Accuracy: 54.53367875647668
-Epoch 5, Validation Accuracy: 54.69559585492228
+Epoch 5, Train Loss: 57400.8603477478
+Epoch 5, Validation Loss: 14723.949443817139
+Epoch 5, Train Accuracy: 54.10189982728843
+Epoch 5, Validation Accuracy: 54.26381692573403

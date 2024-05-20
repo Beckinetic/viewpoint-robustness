@@ -1,4 +1,4 @@
-Epoch 7, Train Loss: 46170.65148925781
-Epoch 7, Validation Loss: 49730.33362579346
-Epoch 7, Train Accuracy: 62.40015112262522
-Epoch 7, Validation Accuracy: 24.622193436960277
+Epoch 7, Train Loss: 46940.51371002197
+Epoch 7, Validation Loss: 14234.839429855347
+Epoch 7, Train Accuracy: 62.1248920552677
+Epoch 7, Validation Accuracy: 56.25

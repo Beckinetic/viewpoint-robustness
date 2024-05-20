@@ -3,6 +3,10 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/data" />
+      <excludeFolder url="file://$MODULE_DIR$/logs/forest_f_f" />
+      <excludeFolder url="file://$MODULE_DIR$/logs/grey_r_f" />
+      <excludeFolder url="file://$MODULE_DIR$/models/forest_f_f" />
+      <excludeFolder url="file://$MODULE_DIR$/models/grey_r_f" />
     </content>
     <orderEntry type="jdk" jdkName="torch-arm64" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

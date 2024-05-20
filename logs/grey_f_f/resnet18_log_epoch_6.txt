@@ -1,4 +1,4 @@
-Epoch 6, Train Loss: 51164.05185699463
-Epoch 6, Validation Loss: 18053.402187347412
-Epoch 6, Train Accuracy: 58.76511226252159
-Epoch 6, Validation Accuracy: 45.63903281519862
+Epoch 6, Train Loss: 51767.65048789978
+Epoch 6, Validation Loss: 38829.771366119385
+Epoch 6, Train Accuracy: 58.36841537132988
+Epoch 6, Validation Accuracy: 21.26511226252159

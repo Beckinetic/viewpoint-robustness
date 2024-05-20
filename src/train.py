@@ -32,8 +32,8 @@ def main():
             for res in config['data']['res']:
                 # model
                 model, _ = get_model(config['model']['model_name'],
-                                              pretrained=False,
-                                              num_classes=config['data']['num_classes'])
+                                     pretrained=config['model']['pretrained'],
+                                     num_classes=config['data']['num_classes'])
                 model.eval()
 
                 # device
@@ -72,6 +72,10 @@ def main():
                                           optimizer,
                                           step_size=config['scheduler']['step_size'],
                                           gamma=config['scheduler']['gamma'])
+
+                # save untrained model as baseline
+                baseline_path = f"{args.model_dir}/{data_folder}/{config['model']['model_name']}_epoch_0.pth"
+                torch.save(model.state_dict(), baseline_path)
 
                 # training Loop
                 # initialise losses and accuracies

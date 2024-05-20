@@ -1,3 +1,5 @@
+import argparse
+import glob
 import json
 import logging
 import os
@@ -5,16 +7,19 @@ import pickle
 import re
 import sys
 
+import yaml
 from PIL import Image
 import torch
-from torch import nn
 from torch.utils.data import Dataset
-from torchvision import models, transforms
-from torchvision.models.resnet import ResNet18_Weights
+from torchvision import transforms
 from tqdm import tqdm
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from src.model.models import get_device, get_model
+
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
-device = torch.device('cuda' if torch.cuda.is_available() else 'mps')
+device = get_device()
 
 
 def get_cue_conflict_images(cue_conflict_folder):
@@ -28,8 +33,7 @@ def get_cue_conflict_images(cue_conflict_folder):
                 full_path = os.path.join(dirpath, file)
                 filepaths.append(full_path)
 
-                filename_without_extension = os.path.splitext(file)[0]
-
+                # needs to be changed after next batch of cue-conflict files (TTK)
                 pattern = re.compile(r'(\D+)(\d*)_(.*)\.jpg')
                 match = pattern.match(file)
                 if match:
@@ -155,15 +159,31 @@ def evaluate_model_on_content(model, data_loader):
     return accuracy
 
 
-if __name__ == '__main__':
-    data_folder = '../../data'
-    cue_conflict_path = os.path.join(data_folder, 'cue_conflict_rf_meadow')
-    content_path = os.path.join(data_folder, 'content_rf_meadow')
-    model_main_folder = '../../saved_models'
-    model_folders = []
-    for dirpath, dirnames, files in os.walk(model_main_folder):
-        for dirname in dirnames:
-            model_folders.append(os.path.join(dirpath, dirname))
+def parse_args():
+    parser = argparse.ArgumentParser(description='Texture bias evaluation on Cue-Conflict Dataset')
+    parser.add_argument('config', type=str, help='Path to the configuration file')
+    parser.add_argument('--log-dir', type=str, default='logs/', help='Directory to save logs')
+    parser.add_argument('--model-dir', type=str, default='models/', help='Directory to load models')
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+
+    with open(args.config, 'r') as file:
+        config = yaml.safe_load(file)
+
+    # get cue-conflict dataset
+    root = config['data']['root']
+    cue_conflict_path = os.path.join(root, 'output')
+    content_path = os.path.join(root, 'content')
+
+    # get models and logs path
+    model_dir = args.model_dir
+    log_dir = args.log_dir
+    model_paths = []
+    for model_folder in config['model']['model_folders']:
+        model_paths.append(os.path.join(model_dir, model_folder))
 
     # prepare cue-conflict dataset
     transform = transforms.Compose([
@@ -180,20 +200,22 @@ if __name__ == '__main__':
     content_dataset = ContentDataset(img_paths, labels, transform)
     content_dataloader = torch.utils.data.DataLoader(content_dataset, batch_size=1, shuffle=True)
 
-    # prepare model (resnet18 backbone)
-    model = models.resnet18(weights=ResNet18_Weights.DEFAULT)
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, 32)
+    # prepare model
+    model_name = config['model']['model_name']
+    model, _ = get_model(model_name, pretrained=False, num_classes=32)
 
     # evaluate the models on content and cue-conflict dataset
-    for model_folder in model_folders:
+    for model_path in model_paths:
         content_accuracies = []
         shape_decisions = []
         texture_decisions = []
+
         # go over all epochs
-        for epoch in tqdm(range(30), desc="Evaluating Models Through Epochs"):
-            logging.info(f"Evaluating Model {model_folder} Epoch {epoch}")
-            state_dict = torch.load(os.path.join(model_folder, str(epoch) + '.pth'), map_location=torch.device(device))
+        epochs = len(glob.glob(os.path.join(model_path, '*.pth')))
+        for epoch in tqdm(range(epochs), desc="Evaluating Models Through Epochs"):
+            logging.info(f"Evaluating Model {model_path} Epoch {epoch}")
+            state_dict = torch.load(os.path.join(model_path, '_'.join([model_name, 'epoch', str(epoch + 1) + '.pth'])),
+                                    map_location=torch.device(device))
             model.load_state_dict(state_dict)
             model.eval()
 
@@ -210,6 +232,11 @@ if __name__ == '__main__':
                   'shape_decisions': shape_decisions,
                   'texture_decisions': texture_decisions}
 
-        save_path = os.path.join(model_folder, 'cue_conflict_results.pkl')
+        os.makedirs(os.path.join(log_dir, os.path.basename(model_path), os.path.basename(root)), exist_ok=True)
+        save_path = os.path.join(log_dir, os.path.basename(model_path), os.path.basename(root), 'results.pkl')
         with open(save_path, 'wb') as f:
             pickle.dump(result, f)
+
+
+if __name__ == '__main__':
+    main()

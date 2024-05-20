@@ -1,9 +1,10 @@
+import json
 import os.path
+import random
 
 from PIL import Image
 from pathlib import Path
 from io import BytesIO
-import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
@@ -13,16 +14,15 @@ import requests
 from torchvision import transforms, models
 from torchvision.models.vgg import VGG19_Weights
 
+from src.model.models import get_device
 
 # define device
-device = torch.device("cuda" if torch.cuda.is_available() else "mps")
-
-vgg = models.vgg19(weights=VGG19_Weights.IMAGENET1K_V1).features
+device = get_device()
 
 # freeze all VGG parameters since we're only optimizing the target image
+vgg = models.vgg19(weights=VGG19_Weights.IMAGENET1K_V1).features
 for param in vgg.parameters():
     param.requires_grad_(False)
-
 vgg.to(device)
 
 
@@ -181,34 +181,50 @@ def style_transfer(content, style, filename, output_dir, steps=2000):
         total_loss.backward()
         optimizer.step()
 
-        # # display intermediate images
-        # if ii % show_every == 0:
-        #     image = Image.fromarray(im_convert(target))
-        #     image.save(os.path.join(output_dir, Path(filename).stem + '_' + str(ii) + '.jpg'))
         if ii == steps:
             image = Image.fromarray(im_convert(target))
             image.save(os.path.join(output_dir, Path(filename).stem + '.jpg'))
 
 
-if __name__ == '__main__':
-    print("Run preview batch...")
-    print(f"Device is {device}")
+def read_json_file(filepath):
+    with open(filepath, 'r') as file:
+        data = json.load(file)
+    return data
 
-    content_dir = 'preview_batch/content'
-    style_dir = 'preview_batch/style'
-    output_dir = 'preview_batch/output'
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
 
-    content_paths = list_img_files(content_dir)
-    styles_paths = list_img_files(style_dir)
+def find_label_by_filename(data, filename):
+    return next((item['label'] for item in data if item['filename'] == filename), None)
 
-    for content_path in content_paths:
-        content_name = Path(content_path).stem
-        content = load_image(content_path).to(device)
-        for style_path in styles_paths:
-            style_name = Path(style_path).stem
-            style = load_image(style_path).to(device)
-            transferred_file_name = content_name + '_' +style_name + '.jpg'
-            print(f"Content: {content_name}; Style: {style_name}")
-            style_transfer(content, style, transferred_file_name, output_dir, steps=400)
+
+def find_filenames_by_label(data, label):
+    return [item['filename'] for item in data if item['label'] == label]
+
+
+def divide_labels(data, num):
+    labels = list(set(item['label'] for item in data))
+    random.shuffle(labels)
+    return [labels[i::num] for i in range(num)]
+
+
+# if __name__ == '__main__':
+#     print("Run preview batch...")
+#     print(f"Device is {device}")
+#
+#     content_dir = 'preview_batch/content'
+#     style_dir = 'preview_batch/style'
+#     output_dir = 'preview_batch/output'
+#     if not os.path.exists(output_dir):
+#         os.makedirs(output_dir)
+#
+#     content_paths = list_img_files(content_dir)
+#     styles_paths = list_img_files(style_dir)
+#
+#     for content_path in content_paths:
+#         content_name = Path(content_path).stem
+#         content = load_image(content_path).to(device)
+#         for style_path in styles_paths:
+#             style_name = Path(style_path).stem
+#             style = load_image(style_path).to(device)
+#             transferred_file_name = content_name + '_' +style_name + '.jpg'
+#             print(f"Content: {content_name}; Style: {style_name}")
+#             style_transfer(content, style, transferred_file_name, output_dir, steps=400)

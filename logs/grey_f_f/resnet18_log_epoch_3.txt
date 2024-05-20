@@ -1,4 +1,4 @@
-Epoch 3, Train Loss: 71476.35576248169
-Epoch 3, Validation Loss: 19115.522979736328
-Epoch 3, Train Accuracy: 44.84833765112263
-Epoch 3, Validation Accuracy: 40.770725388601036
+Epoch 3, Train Loss: 71135.31015014648
+Epoch 3, Validation Loss: 17937.88892364502
+Epoch 3, Train Accuracy: 45.04263816925734
+Epoch 3, Validation Accuracy: 46.038428324697755

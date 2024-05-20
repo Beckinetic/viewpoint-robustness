@@ -1,0 +1,7 @@
+data:
+  root: ../data/cue_conflict_meadow_f_f
+
+params:
+  num_subsets: 4
+  seed: 42
+  num_step: 200

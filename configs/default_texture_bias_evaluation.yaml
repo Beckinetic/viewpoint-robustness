@@ -1,0 +1,9 @@
+data:
+  root: ../data/cue_conflict_meadow_f_f
+
+model:
+  model_folders:
+    - forest_r_f
+    - grey_f_f
+    - grey_r_f
+  model_name: resnet18
