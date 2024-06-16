@@ -14,7 +14,7 @@ import requests
 from torchvision import transforms, models
 from torchvision.models.vgg import VGG19_Weights
 
-from src.model.models import get_device
+from model.models import get_device
 
 # define device
 device = get_device()
@@ -90,7 +90,7 @@ def get_features(image, model, layers=None):
                   '5': 'conv2_1',
                   '10': 'conv3_1',
                   '19': 'conv4_1',
-                  '21': 'conv4_2',  # content representation output
+                  '21': 'conv4_2',  # content representation _output
                   '28': 'conv5_1'}
 
     features = {}
@@ -193,38 +193,14 @@ def read_json_file(filepath):
 
 
 def find_label_by_filename(data, filename):
-    return next((item['label'] for item in data if item['filename'] == filename), None)
+    return data.get(filename, None)
 
 
 def find_filenames_by_label(data, label):
-    return [item['filename'] for item in data if item['label'] == label]
+    return [filename for filename, lbl in data.items() if lbl == label]
 
 
 def divide_labels(data, num):
-    labels = list(set(item['label'] for item in data))
+    labels = list(set(data.values()))
     random.shuffle(labels)
     return [labels[i::num] for i in range(num)]
-
-
-# if __name__ == '__main__':
-#     print("Run preview batch...")
-#     print(f"Device is {device}")
-#
-#     content_dir = 'preview_batch/content'
-#     style_dir = 'preview_batch/style'
-#     output_dir = 'preview_batch/output'
-#     if not os.path.exists(output_dir):
-#         os.makedirs(output_dir)
-#
-#     content_paths = list_img_files(content_dir)
-#     styles_paths = list_img_files(style_dir)
-#
-#     for content_path in content_paths:
-#         content_name = Path(content_path).stem
-#         content = load_image(content_path).to(device)
-#         for style_path in styles_paths:
-#             style_name = Path(style_path).stem
-#             style = load_image(style_path).to(device)
-#             transferred_file_name = content_name + '_' +style_name + '.jpg'
-#             print(f"Content: {content_name}; Style: {style_name}")
-#             style_transfer(content, style, transferred_file_name, output_dir, steps=400)

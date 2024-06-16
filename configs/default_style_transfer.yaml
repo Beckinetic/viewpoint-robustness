@@ -1,7 +1,7 @@
 data:
-  root: ../data/cue_conflict_meadow_f_f
+  root: ../data/cue_conflict_mixed
 
 params:
-  num_subsets: 4
+  num_subsets: 32
   seed: 42
-  num_step: 200
+  num_step: 10

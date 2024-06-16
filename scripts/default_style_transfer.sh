@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONFIG_PATH="../../configs/default_style_transfer.yaml"
+CONFIG_PATH="../configs/default_style_transfer.yaml"
 
 usage() {
     echo "Usage: $0 [-c <config_path>]"
@@ -16,4 +16,4 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-python ../src/data/create_cue_conflict.py "$CONFIG_PATH"
+python ../src/create_cue_conflict.py "$CONFIG_PATH"

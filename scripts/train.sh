@@ -1,12 +1,12 @@
 #!/bin/bash
 
-CONFIG_PATH="../configs/default_texture_bias_evaluation.yaml"
+CONFIG_PATH="../configs/train.yaml"
 LOG_DIR="../logs"
 MODEL_DIR="../models"
 
 usage() {
     echo "Usage: $0 [-c <config_path>] [-l <log_dir>] [-m <model_dir>]"
-    echo "  -c, --config       Path to the configuration file (default: configs/default_texture_bias_evaluation.yaml)"
+    echo "  -c, --config       Path to the configuration file (default: configs/default_config.yaml)"
     echo "  -l, --log-dir      Directory to save logs (default: logs/)"
     echo "  -m, --model-dir    Directory to save models (default: models/)"
     exit 1
@@ -25,4 +25,4 @@ done
 mkdir -p "$LOG_DIR"
 mkdir -p "$MODEL_DIR"
 
-python ../src/texture_shape_bias/texture_bias_evaluation.py "$CONFIG_PATH" --log-dir "$LOG_DIR" --model-dir "$MODEL_DIR"
+python ../src/train.py "$CONFIG_PATH" --log-dir "$LOG_DIR" --model-dir "$MODEL_DIR"

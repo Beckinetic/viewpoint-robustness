@@ -1,16 +1,16 @@
 import argparse
 import os
 import pickle
-
 import yaml
 from matplotlib import pyplot as plt
+import numpy as np
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Plot loss and accuracy')
     parser.add_argument('config', type=str, help='Path to the configuration file')
     parser.add_argument('--log-dir', type=str, default='logs/', help='Directory to save logs')
-    parser.add_argument('--plot-dir', type=str, default='plots/', help='Directory to save logs')
+    parser.add_argument('--plot-dir', type=str, default='plots/', help='Directory to save plots')
     return parser.parse_args()
 
 
@@ -26,49 +26,165 @@ def main():
     log_folders = config['log']['log_folders']
     cue_conflict_folder = config['log']['cue_conflict']
     model_name = config['model']['model_name']
+    prefix = config['plot']['prefix']
     acc_min = config['plot']['acc_min']
     acc_max = config['plot']['acc_max']
+
+    category_labels = {  # Map numerical labels to category names
+        0: 'airplane', 1: 'backpack', 2: 'basket', 3: 'bed', 4: 'bicycle', 5: 'bread',
+        6: 'cabinet', 7: 'cake', 8: 'camera', 9: 'candle', 10: 'car_(automobile)', 11: 'chair',
+        12: 'clock', 13: 'cone', 14: 'frying_pan', 15: 'hat', 16: 'jacket', 17: 'laptop_computer',
+        18: 'microwave_oven', 19: 'motorcycle', 20: 'pie', 21: 'pizza', 22: 'sandwich', 23: 'shirt',
+        24: 'shoe', 25: 'sofa', 26: 'street_sign', 27: 'sweat_pants', 28: 'table', 29: 'television_set',
+        30: 'trash_can', 31: 'truck'
+    }
+
+    model_names = []
+    content_accuracies = []
+    shape_biases = []
+    texture_biases = []
+    total_shape_decisions = []
+    total_texture_decisions = []
+
+    shape_bias_by_category = {label: [] for label in category_labels.keys()}
+    texture_bias_by_category = {label: [] for label in category_labels.keys()}
 
     for log_folder in log_folders:
         result_path = os.path.join(log_dir, log_folder, cue_conflict_folder, 'results.pkl')
         with open(result_path, 'rb') as file:
             results = pickle.load(file)
 
-        content_acc = results['content_accuracies']
-        epochs = range(0, len(results['content_accuracies']) + 1)
+        # Extract metrics
+        content_accuracy = results['content_accuracies'][0]
+        shape_decisions = results['shape_decisions'][0]
+        texture_decisions = results['texture_decisions'][0]
 
-        shape_bias = []
-        cue_conflict_acc = []
-        for i in range(len(epochs) - 1):
-            shape_bias.append(results['shape_decisions'][i] / (
-                    results['texture_decisions'][i] + results['shape_decisions'][i]))
-            cue_conflict_acc.append(
-                results['shape_decisions'][i] + results['texture_decisions'][i])
+        total_shape_decision_count = sum(shape_decisions.values())
+        total_texture_decision_count = sum(texture_decisions.values())
+        overall_decision_count = total_shape_decision_count + total_texture_decision_count
 
-        shape_bias.insert(0, 0.5)
-        cue_conflict_acc.insert(0, 0.0625)
-        content_acc.insert(0, 0.03125)
+        shape_bias = total_shape_decision_count / overall_decision_count
+        texture_bias = total_texture_decision_count / overall_decision_count
 
-        plt.plot(epochs, shape_bias, label='Shape Bias')
+        model_names.append(log_folder)  # Use log_folder name as model identifier
+        content_accuracies.append(content_accuracy)
+        shape_biases.append(shape_bias)
+        texture_biases.append(texture_bias)
+        total_shape_decisions.append(total_shape_decision_count)
+        total_texture_decisions.append(total_texture_decision_count)
 
-        plt.plot(epochs, content_acc, label='Content Accuracy')
+        for category in shape_decisions:
+            total_decisions = shape_decisions[category] + texture_decisions[category]
+            if total_decisions > 0:
+                shape_bias_by_category[category].append(shape_decisions[category] / total_decisions)
+                texture_bias_by_category[category].append(texture_decisions[category] / total_decisions)
+            else:
+                shape_bias_by_category[category].append(0)
+                texture_bias_by_category[category].append(0)
 
-        plt.plot(epochs, cue_conflict_acc, label='Cue Conflict Accuracy')
+    # Aggregate shape and texture biases by category across all models
+    mean_shape_bias_by_category = {label: np.mean(biases) for label, biases in shape_bias_by_category.items()}
+    mean_texture_bias_by_category = {label: np.mean(biases) for label, biases in texture_bias_by_category.items()}
 
-        plt.xlabel('Epoch')
-        plt.xticks(range(0, len(epochs), 5))
-        plt.ylabel('Accuracy')
-        plt.ylim([acc_min, acc_max])
-        title = '_'.join([model_name, log_folder, cue_conflict_folder])
-        plt.title(title)
-        plt.legend(loc='upper right')
+    # Plotting content accuracies
+    plt.figure(figsize=(10, 6))
+    plt.bar(model_names, content_accuracies, color='skyblue')
+    plt.xlabel('Model')
+    plt.ylabel('Content Accuracy')
+    plt.title('Content Accuracies of Different Models')
+    plt.ylim(acc_min, acc_max)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, '_'.join([model_name, prefix, 'content_accuracies.png'])))
+    plt.show()
 
-        os.makedirs(os.path.join(plot_dir, log_folder), exist_ok=True)
-        save_path = os.path.join(plot_dir, log_folder, '_'.join([title, 'cue_conflict.png']))
-        plt.savefig(save_path)
-        plt.close()
+    # Plotting overall shape bias
+    plt.figure(figsize=(10, 6))
+    plt.bar(model_names, shape_biases, color='salmon')
+    plt.xlabel('Model')
+    plt.ylabel('Overall Shape Bias')
+    plt.title('Overall Shape Bias of Different Models')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, '_'.join([model_name, prefix, 'overall_shape_bias.png'])))
+    plt.show()
+
+    # Plotting overall texture bias
+    plt.figure(figsize=(10, 6))
+    plt.bar(model_names, texture_biases, color='lightgreen')
+    plt.xlabel('Model')
+    plt.ylabel('Overall Texture Bias')
+    plt.title('Overall Texture Bias of Different Models')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, '_'.join([model_name, prefix, 'overall_texture_bias.png'])))
+    plt.show()
+
+    # Plotting overall count of shape or texture decisions
+    plt.figure(figsize=(10, 6))
+    width = 0.35
+    indices = np.arange(len(model_names))
+    plt.bar(indices - width/2, total_shape_decisions, width, label='Shape Decisions', color='steelblue')
+    plt.bar(indices + width/2, total_texture_decisions, width, label='Texture Decisions', color='darkorange')
+    plt.xlabel('Model')
+    plt.ylabel('Decision Count')
+    plt.title('Total Shape and Texture Decisions of Different Models')
+    plt.xticks(indices, model_names, rotation=45)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, '_'.join([model_name, prefix, 'total_decisions.png'])))
+    plt.show()
+
+    # Plotting shape bias by category as scatter plot
+    plt.figure(figsize=(15, 10))
+    for model_idx, model in enumerate(model_names):
+        biases = [shape_bias_by_category[category][model_idx] for category in category_labels.keys()]
+        plt.scatter(category_labels.values(), biases, label=model)
+    plt.xlabel('Category')
+    plt.ylabel('Shape Bias by Category')
+    plt.title('Shape Bias by Category for Different Models')
+    plt.xticks(rotation=90)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, '_'.join([model_name, prefix, 'shape_bias_by_category.png'])))
+    plt.show()
+
+    # Plotting texture bias by category as scatter plot
+    plt.figure(figsize=(15, 10))
+    for model_idx, model in enumerate(model_names):
+        biases = [texture_bias_by_category[category][model_idx] for category in category_labels.keys()]
+        plt.scatter(category_labels.values(), biases, label=model)
+    plt.xlabel('Category')
+    plt.ylabel('Texture Bias by Category')
+    plt.title('Texture Bias by Category for Different Models')
+    plt.xticks(rotation=90)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, '_'.join([model_name, prefix, 'texture_bias_by_category.png'])))
+    plt.show()
+
+    # Plotting bar plots for mean shape bias by categories
+    plt.figure(figsize=(15, 10))
+    plt.bar(category_labels.values(), mean_shape_bias_by_category.values(), color='steelblue')
+    plt.xlabel('Category')
+    plt.ylabel('Mean Shape Bias')
+    plt.title('Mean Shape Bias by Category Across All Models')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, '_'.join([model_name, prefix, 'mean_shape_bias_by_category.png'])))
+    plt.show()
+
+    # Plotting bar plots for mean texture bias by categories
+    plt.figure(figsize=(15, 10))
+    plt.bar(category_labels.values(), mean_texture_bias_by_category.values(), color='darkorange')
+    plt.xlabel('Category')
+    plt.ylabel('Mean Texture Bias')
+    plt.title('Mean Texture Bias by Category Across All Models')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, '_'.join([model_name, prefix, 'mean_texture_bias_by_category.png'])))
+    plt.show()
 
 
 if __name__ == '__main__':
     main()
-    print('Done')

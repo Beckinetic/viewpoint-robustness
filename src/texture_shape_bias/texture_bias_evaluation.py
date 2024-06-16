@@ -4,7 +4,6 @@ import json
 import logging
 import os
 import pickle
-import re
 import sys
 
 import yaml
@@ -33,15 +32,15 @@ def get_cue_conflict_images(cue_conflict_folder):
                 full_path = os.path.join(dirpath, file)
                 filepaths.append(full_path)
 
-                # needs to be changed after next batch of cue-conflict files (TTK)
-                pattern = re.compile(r'(\D+)(\d*)_(.*)\.jpg')
-                match = pattern.match(file)
-                if match:
-                    shape_label, instance_number, texture_label = match.groups()
-
+                parts = os.path.basename(file).split('_')
                 # Update dictionaries
-                shape_labels[full_path] = shape_label
-                texture_labels[full_path] = texture_label
+                shape_id = parts[0]
+                texture_id = parts[-1].split('.')[0]
+
+                with open('../objaverse/parsed_lvis_annotations.json') as f:
+                    annotations = json.load(f)
+                shape_labels[full_path] = annotations[shape_id]
+                texture_labels[full_path] = annotations[texture_id]
 
     return filepaths, shape_labels, texture_labels
 
@@ -60,29 +59,19 @@ def get_content_images(content_folder):
                 filenames.append(file)
                 full_path = os.path.join(dirpath, file)
                 filepaths.append(full_path)
-
-        for item in labels:
-            if item['filename'] in filenames:
-                content_labels[os.path.join(content_folder, item['filename'])] = item['label']
+                content_labels[full_path] = labels[full_path]
 
     return filepaths, content_labels
 
 
 class CueConflictDataset(Dataset):
     def __init__(self, img_paths, shape_labels, texture_labels, transform=None):
-        """
-        img_paths: List with all the image paths.
-        shape_labels: Dictionary mapping image paths to their shape labels.
-        texture_labels: Dictionary mapping image paths to their texture labels.
-        transform: Optional transform to be applied on a sample.
-        """
         self.img_paths = img_paths
         self.shape_labels = shape_labels
         self.texture_labels = texture_labels
         self.transform = transform
 
-        # Automate class_map creation
-        unique_labels = sorted(set(self.shape_labels.values()))  # Sort to ensure consistent order
+        unique_labels = sorted(set(self.shape_labels.values()))
         self.class_map = {label: index for index, label in enumerate(unique_labels)}
 
     def __len__(self):
@@ -91,7 +80,6 @@ class CueConflictDataset(Dataset):
     def __getitem__(self, idx):
         img_path = self.img_paths[idx]
         image = Image.open(img_path).convert('RGB')
-
         shape_label = self.shape_labels[img_path]
         texture_label = self.texture_labels[img_path]
 
@@ -101,7 +89,41 @@ class CueConflictDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
-        return image, shape_class_id, texture_class_id
+        return image, shape_class_id, texture_class_id, img_path
+
+    def get_triplet(self, idx):
+        anchor_img_path = self.img_paths[idx]
+        anchor_shape_label = self.shape_labels[anchor_img_path]
+        anchor_texture_label = self.texture_labels[anchor_img_path]
+
+        # find texture image
+        texture_img_path = None
+        for path in self.img_paths:
+            if self.texture_labels[path] == anchor_texture_label and self.shape_labels[path] != anchor_shape_label:
+                texture_img_path = path
+                break
+
+        # find shape image
+        shape_img_path = None
+        for path in self.img_paths:
+            if self.shape_labels[path] == anchor_shape_label and self.texture_labels[path] != anchor_texture_label:
+                shape_img_path = path
+                break
+
+        assert texture_img_path is not None, "No matching texture image found."
+        assert shape_img_path is not None, "No matching shape image found."
+
+        # load images
+        anchor_image = Image.open(anchor_img_path).convert('RGB')
+        texture_image = Image.open(texture_img_path).convert('RGB')
+        shape_image = Image.open(shape_img_path).convert('RGB')
+
+        if self.transform:
+            anchor_image = self.transform(anchor_image)
+            texture_image = self.transform(texture_image)
+            shape_image = self.transform(shape_image)
+
+        return anchor_image, texture_image, shape_image
 
 
 class ContentDataset(Dataset):
@@ -130,27 +152,56 @@ class ContentDataset(Dataset):
         return image, class_id
 
 
-def evaluate_model_texutre_shape_bias(model, data_loader):
+def evaluate_model_texture_shape_bias(model, data_loader, device):
     model.eval()  # Set the model to evaluation mode
-    total = 0
-    shape_decisions = 0
-    texture_decisions = 0
+
+    # Initialize category-specific counters
+    category_shape_decisions = {}
+    category_texture_decisions = {}
+    category_totals = {}
+
     with torch.no_grad():  # Disable gradient computation
-        for images, shape_labels, texture_labels in tqdm(data_loader, desc="Testing on Cue-Conflict Dataset"):
+        for images, shape_labels, texture_labels, img_paths in tqdm(data_loader,
+                                                                    desc="Testing on Cue-Conflict Dataset"):
+            images = images.to(device)
+            shape_labels = shape_labels.to(device)
+            texture_labels = texture_labels.to(device)
+
             outputs = model(images)
             predicted = torch.argmax(outputs, 1)
-            total += len(shape_labels)
-            shape_decisions += (predicted == shape_labels).sum().item()
-            texture_decisions += (predicted == texture_labels).sum().item()
-    return shape_decisions / total, texture_decisions / total
+
+            for i in range(len(shape_labels)):
+                shape_label = shape_labels[i].item()
+                texture_label = texture_labels[i].item()
+
+                # Update totals for each category
+                if shape_label not in category_totals:
+                    category_totals[shape_label] = 0
+                    category_shape_decisions[shape_label] = 0
+                    category_texture_decisions[shape_label] = 0
+
+                category_totals[shape_label] += 1
+                if predicted[i].item() == shape_label:
+                    category_shape_decisions[shape_label] += 1
+                if predicted[i].item() == texture_label:
+                    category_texture_decisions[shape_label] += 1
+
+    # Calculate the shape and texture bias for each category
+    # shape_bias = {label: category_shape_decisions[label] / category_totals[label] for label in category_totals}
+    # texture_bias = {label: category_texture_decisions[label] / category_totals[label] for label in category_totals}
+
+    return category_shape_decisions, category_texture_decisions, category_totals
 
 
-def evaluate_model_on_content(model, data_loader):
+def evaluate_model_on_content(model, data_loader, device):
     model.eval()  # Set the model to evaluation mode
     total = 0
     correct = 0
     with torch.no_grad():
         for images, labels in tqdm(data_loader, desc="Testing on Content Dataset"):
+            images = images.to(device)
+            labels = labels.to(device)
+
             outputs = model(images)
             predicted = torch.argmax(outputs, 1)
             total += len(labels)
@@ -175,7 +226,7 @@ def main():
 
     # get cue-conflict dataset
     root = config['data']['root']
-    cue_conflict_path = os.path.join(root, 'output')
+    cue_conflict_path = os.path.join(root, '_output')
     content_path = os.path.join(root, 'content')
 
     # get models and logs path
@@ -222,7 +273,7 @@ def main():
             logging.info(f"Evaluating on content dataset")
             content_accuracy = evaluate_model_on_content(model, content_dataloader)
             logging.info(f"Evaluating on cue-conflict dataset")
-            shape_decision, texture_decision = evaluate_model_texutre_shape_bias(model, cue_conflict_dataloader)
+            shape_decision, texture_decision = evaluate_model_texture_shape_bias(model, cue_conflict_dataloader)
 
             content_accuracies.append(content_accuracy)
             shape_decisions.append(shape_decision)

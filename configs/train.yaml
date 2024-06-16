@@ -3,11 +3,11 @@ data:
   batch_size: 32
   num_classes: 32
   view:
-    - r
+    - fx
   res:
     - f
   background:
-    - forest
+    - meadow
 
 model:
   model_name: resnet18
@@ -15,7 +15,7 @@ model:
 
 training:
   epochs: 30
-  check_point: 1
+  check_point: 30
 
 optimizer:
   optimizer_name: SGD
