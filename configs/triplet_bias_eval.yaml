@@ -1,0 +1,10 @@
+data:
+  root: ../data/cue_conflict_mixed
+
+model:
+  model_folders:
+    - forest_f_f
+    - forest_r_f
+    - grey_f_f
+    - grey_r_f
+  model_name: resnet18

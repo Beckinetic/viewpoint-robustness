@@ -1,0 +1,17 @@
+log:
+  view:
+    - f
+    - r
+  res:
+    - combined
+  background:
+    - combined
+
+model:
+  model_name: resnet18
+
+plot:
+  loss_min: 0
+  loss_max: 5
+  acc_min: 0
+  acc_max: 100

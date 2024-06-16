@@ -1,0 +1,16 @@
+data:
+  background:
+    - meadow
+    - forest
+    - desert
+    - industrial
+  view:
+    - f
+#    - r
+#    - fx
+  res:
+    - f
+
+sample:
+  sample_num: 1
+  output: cue_conflict_mixed/content

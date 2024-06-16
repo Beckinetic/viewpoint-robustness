@@ -1,0 +1,11 @@
+data:
+  data_folders:
+    - transparent_grey_fx_f
+
+log:
+  log_folders:
+    - meadow_fx_f
+    - forest_fx_f
+    - desert_fx_f
+    - industrial_fx_f
+  cue_conflict: cue_conflict_mixed

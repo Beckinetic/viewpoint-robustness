@@ -1,0 +1,11 @@
+data:
+  root: ../data/cue_conflict_mixed
+
+model:
+  model_folders:
+    - combined_f_combined
+    - combined_r_combined
+  model_name: resnet18
+
+training:
+  last_epoch: 30
