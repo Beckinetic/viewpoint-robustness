@@ -28,7 +28,7 @@ def get_cue_conflict_images(cue_conflict_folder):
 
     for dirpath, dirnames, files in os.walk(cue_conflict_folder):
         for file in files:
-            if file.endswith('.jpg'):
+            if file.endswith('.jpg') or file.endswith('.png'):
                 full_path = os.path.join(dirpath, file)
                 filepaths.append(full_path)
 
@@ -226,7 +226,7 @@ def main():
 
     # get cue-conflict dataset
     root = config['data']['root']
-    cue_conflict_path = os.path.join(root, '_output')
+    cue_conflict_path = os.path.join(root, 'output')
     content_path = os.path.join(root, 'content')
 
     # get models and logs path

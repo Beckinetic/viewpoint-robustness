@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONFIG_PATH="../configs/default_style_transfer.yaml"
+CONFIG_PATH="../configs/style_transfer.yaml"
 
 usage() {
     echo "Usage: $0 [-c <config_path>]"

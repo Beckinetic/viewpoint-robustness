@@ -29,6 +29,9 @@ def main():
 
     mixed_datasets = {}
     val_dataloaders = []
+    saved_datasets = os.path.join(config['data']['root'],
+                                  '_'.join(['mixed', config['mix']['view'], config['mix']['res']]))
+
     for biased_ratio in config['mix']['biased_ratios_val']:
         # load the raw datasets
         raw_datasets = []
@@ -50,21 +53,21 @@ def main():
         print(groups)
 
         # mix the datasets
-        saved_datasets = os.path.join(config['data']['data_folders'],
-                                      '_'.join(['mixed', config['mix']['view'], config['mix']['res']]))
-        if not os.path.exists(saved_datasets):
-            mixed_datasets = mix_dataset(raw_datasets, groups, num_partitions, biased_ratio)
-            os.makedirs(saved_datasets, exist_ok=True)
-            with open(os.path.join(saved_datasets, 'mixed_data.pkl'), 'wb') as f:
-                pickle.dump(mixed_datasets, f)
-            print(f"Mixed dataset saved to {saved_datasets}")
-        else:
+        if os.path.exists(os.path.join(saved_datasets, 'mixed_data.pkl')):
             with open(os.path.join(saved_datasets, 'mixed_data.pkl'), 'rb') as f:
                 mixed_datasets = pickle.load(f)
             print(f"Loaded mixed dataset from {saved_datasets}")
 
+        mixed_datasets[biased_ratio] = mix_dataset(raw_datasets, groups, num_partitions, biased_ratio)
+
         _, val_dataset = train_test_split_mixed_dataset(mixed_datasets[biased_ratio], 0.2, random_state=42)
         val_dataloaders.append(DataLoader(val_dataset, batch_size=config['data']['batch_size'], shuffle=True))
+
+    # save the mixed datasets
+    os.makedirs(saved_datasets, exist_ok=True)
+    with open(os.path.join(saved_datasets, 'mixed_data.pkl'), 'wb') as f:
+        pickle.dump(mixed_datasets, f)
+    print(f"Mixed dataset saved to {saved_datasets}")
 
     for biased_ratio in config['mix']['biased_ratios_train']:
         # model

@@ -2,6 +2,6 @@ data:
   root: ../data/cue_conflict_mixed
 
 params:
-  num_subsets: 32
+  num_subsets: 8
   seed: 42
-  num_step: 10
+  num_step: 2000

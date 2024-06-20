@@ -58,13 +58,15 @@ def main():
         content_accuracy = results['content_accuracies'][0]
         shape_decisions = results['shape_decisions'][0]
         texture_decisions = results['texture_decisions'][0]
+        all_decisions = results['total_decisions'][0]
 
         total_shape_decision_count = sum(shape_decisions.values())
         total_texture_decision_count = sum(texture_decisions.values())
+        all_decisions_count = sum(all_decisions.values())
         overall_decision_count = total_shape_decision_count + total_texture_decision_count
 
-        shape_bias = total_shape_decision_count / overall_decision_count
-        texture_bias = total_texture_decision_count / overall_decision_count
+        shape_bias = np.sqrt(total_shape_decision_count / overall_decision_count) * np.sqrt(total_shape_decision_count / all_decisions_count)
+        texture_bias = np.sqrt(total_texture_decision_count / overall_decision_count) * np.sqrt(total_texture_decision_count / all_decisions_count)
 
         model_names.append(log_folder)  # Use log_folder name as model identifier
         content_accuracies.append(content_accuracy)
