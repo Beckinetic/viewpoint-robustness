@@ -31,6 +31,9 @@ def plot_view_loss():
 
                 other_views = [other_view for other_view in config['log']['view'] if other_view != view]
                 other_log_folders = []
+                view_labels = {'f': 'free',
+                               'r': 'restricted',
+                               'fx': 'fixed'}
                 for other_view in other_views:
                     other_log_folders.append('_'.join([background, other_view, res]))
 
@@ -47,9 +50,11 @@ def plot_view_loss():
 
                 epochs = range(1, len(train_loss) + 1)
                 fig, ax1 = plt.subplots()
+                # fig.set_size_inches(8, 4.5)
+                fig.tight_layout()
 
-                ax1.plot(epochs, train_loss, label=f'Train Loss View = {view}')
-                ax1.plot(epochs, val_loss, label=f'Val Loss View = {view}')
+                ax1.plot(epochs, train_loss, label=f'TL: {view_labels[view]} view', linestyle='-')
+                ax1.plot(epochs, val_loss, label=f'VL: {view_labels[view]} view', linestyle='--')
 
                 for ind, other_view in enumerate(other_views):
                     other_result_path = other_result_paths[ind]
@@ -59,18 +64,20 @@ def plot_view_loss():
 
                     other_train_loss = other_result['tl']
                     other_val_loss = other_result['vl']
-                    ax1.plot(epochs, other_train_loss, label=f'Train Loss View = {other_view}')
-                    ax1.plot(epochs, other_val_loss, label=f'Val Loss View = {other_view}')
+                    ax1.plot(epochs, other_train_loss, label=f'TL: {view_labels[other_view]} view', linestyle='-')
+                    ax1.plot(epochs, other_val_loss, label=f'VL: {view_labels[other_view]} view', linestyle='--')
+
 
                 # overall plotting
                 ax1.set_xlabel('Epoch')
                 ax1.set_ylabel('Loss')
                 ax1.set_ylim([config['plot']['loss_min'], config['plot']['loss_max']])
 
-                ax1.legend(loc='lower right')
+                ax1.legend(loc='upper right')
                 plt.tight_layout()
                 title = '_'.join([model_name, log_folder])
-                plt.title(title)
+                # plt.title(title)
+                print(f"{title}: The min train loss is {min(train_loss)}, min validation loss is {min(val_loss)}")
 
                 os.makedirs(os.path.join(args.plot_dir, log_folder), exist_ok=True)
                 save_path = os.path.join(args.plot_dir, log_folder, '_'.join([title, 'view_comparison_loss.png']))
@@ -93,6 +100,9 @@ def plot_view_acc():
 
                 other_views = [other_view for other_view in config['log']['view'] if other_view != view]
                 other_log_folders = []
+                view_labels = {'f': 'free',
+                               'r': 'restricted',
+                               'fx': 'fixed'}
                 for other_view in other_views:
                     other_log_folders.append('_'.join([background, other_view, res]))
 
@@ -109,9 +119,11 @@ def plot_view_acc():
 
                 epochs = range(1, len(train_accs) + 1)
                 fig, ax1 = plt.subplots()
+                # fig.set_size_inches(8, 4.5)
+                fig.tight_layout()
 
-                ax1.plot(epochs, train_accs, label=f'Train Acc View = {view}')
-                ax1.plot(epochs, val_accs, label=f'Val Acc View = {view}')
+                ax1.plot(epochs, train_accs, label=f'TA: {view_labels[view]} view', linestyle='-')
+                ax1.plot(epochs, val_accs, label=f'VA: {view_labels[view]} view', linestyle='--')
 
                 for ind, other_view in enumerate(other_views):
                     other_result_path = other_result_paths[ind]
@@ -121,8 +133,8 @@ def plot_view_acc():
 
                     other_train_accs = other_result['ta']
                     other_val_accs = other_result['va']
-                    ax1.plot(epochs, other_train_accs, label=f'Train Acc View = {other_view}')
-                    ax1.plot(epochs, other_val_accs, label=f'Val Acc View = {other_view}')
+                    ax1.plot(epochs, other_train_accs, label=f'TA: {view_labels[other_view]} view', linestyle='-')
+                    ax1.plot(epochs, other_val_accs, label=f'VA: {view_labels[other_view]} view', linestyle='--')
 
                 # overall plotting
                 ax1.set_xlabel('Epoch')
@@ -132,7 +144,8 @@ def plot_view_acc():
                 ax1.legend(loc='lower right')
                 plt.tight_layout()
                 title = '_'.join([model_name, log_folder])
-                plt.title(title)
+                # plt.title(title)
+                print(f"{title}: The max train acc is {max(train_accs)}, max validation acc is {max(val_accs)}")
 
                 os.makedirs(os.path.join(args.plot_dir, log_folder), exist_ok=True)
                 save_path = os.path.join(args.plot_dir, log_folder, '_'.join([title, 'view_comparison_acc.png']))
@@ -164,14 +177,14 @@ def plot_loss_acc():
                 fig, ax1 = plt.subplots()
                 ax2 = ax1.twinx()
 
-                ax1.plot(epochs, train_losses, label='Train loss')
-                ax1.plot(epochs, val_losses, label='Val loss')
+                ax1.plot(epochs, train_losses, label='Train loss', color='blue')
+                ax1.plot(epochs, val_losses, label='Val loss', color='red')
                 ax1.set_xlabel('Epoch')
                 ax1.set_ylabel('Loss')
                 ax1.set_ylim([config['plot']['loss_min'], config['plot']['loss_max']])
 
-                ax2.plot(epochs, train_accs, label='Train acc')
-                ax2.plot(epochs, val_accs, label='Val acc')
+                ax2.plot(epochs, train_accs, label='Train acc', color='blue', linestyle='-')
+                ax2.plot(epochs, val_accs, label='Val acc',color='red', linestyle='--')
                 ax2.set_ylabel('Accuracy')
                 ax2.set_ylim([config['plot']['acc_min'], config['plot']['acc_max']])
 
@@ -187,7 +200,7 @@ def plot_loss_acc():
 
 
 if __name__ == '__main__':
-    plot_loss_acc()
+    # plot_loss_acc()
     plot_view_loss()
     plot_view_acc()
     print('Done')

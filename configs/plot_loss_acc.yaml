@@ -2,10 +2,16 @@ log:
   view:
     - f
     - r
+    - fx
   res:
-    - combined
+    - f
+#    - combined
   background:
-    - combined
+    - meadow
+    - forest
+    - industrial
+    - desert
+#    - combined
 
 model:
   model_name: resnet18
@@ -15,3 +21,5 @@ plot:
   loss_max: 5
   acc_min: 0
   acc_max: 100
+
+

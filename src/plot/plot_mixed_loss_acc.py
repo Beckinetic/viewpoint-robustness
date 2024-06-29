@@ -54,12 +54,12 @@ def plot_mixed_loss_acc():
 
             # create and save the heatmap
             plt.figure(figsize=(10, 8))
-            ax = sns.heatmap(min_validation_losses_array, annot=True, cmap='coolwarm')
+            ax = sns.heatmap(min_validation_losses_array, annot=True, cmap='coolwarm', vmin=config['plot']['loss_min'], vmax=config['plot']['loss_max'])
             title = '_'.join([model_name, "val_losses"])
             plt.title(title)
             plt.xticks(np.arange(len(biased_ratios)) + 0.5, biased_ratios, rotation=45)
             plt.yticks(np.arange(len(biased_ratios)) + 0.5, biased_ratios, rotation=45)
-            rect = patches.Rectangle((2, 0), 1, len(min_validation_losses_array), linewidth=2, edgecolor='black',
+            rect = patches.Rectangle((1, 0), 1, len(min_validation_losses_array), linewidth=2, edgecolor='black',
                                      facecolor='none')
             ax.add_patch(rect)
             plt.xlabel('Validation Set Biased Ratio')
@@ -70,12 +70,12 @@ def plot_mixed_loss_acc():
             plt.savefig(save_path)
 
             plt.figure(figsize=(10, 8))
-            ax = sns.heatmap(max_validation_accuracies_array, annot=True, cmap='coolwarm')
+            ax = sns.heatmap(max_validation_accuracies_array, annot=True, cmap='coolwarm', vmin=config['plot']['acc_min'], vmax=config['plot']['acc_max'])
             title = '_'.join([model_name, "val_acc"])
-            plt.title(title)
+            # plt.title(title)
             plt.xticks(np.arange(len(biased_ratios)) + 0.5, biased_ratios, rotation=45)
             plt.yticks(np.arange(len(biased_ratios)) + 0.5, biased_ratios, rotation=45)
-            rect = patches.Rectangle((2, 0), 1, len(max_validation_accuracies_array), linewidth=2, edgecolor='black',
+            rect = patches.Rectangle((1, 0), 1, len(max_validation_accuracies_array), linewidth=2, edgecolor='black',
                                      facecolor='none')
             ax.add_patch(rect)
             plt.xlabel('Validation Set Biased Ratio')
@@ -98,7 +98,6 @@ def plot_mixed_loss_acc():
                 train_accs = result['ta']
                 val_losses = result['vl'][i]
                 val_accs = result['va'][i]
-                print(val_accs)
 
                 epochs = range(1, len(train_losses) + 1)
                 fig, ax1 = plt.subplots()
@@ -121,7 +120,7 @@ def plot_mixed_loss_acc():
                 ax2.legend(loc='upper right')
                 plt.tight_layout()
                 title = '_'.join([model_name, plot_folder])
-                plt.title(title)
+                # plt.title(title)
 
                 os.makedirs(os.path.join(args.plot_dir, plot_folder), exist_ok=True)
                 save_path = os.path.join(args.plot_dir, plot_folder, '_'.join([title, 'loss_acc.png']))

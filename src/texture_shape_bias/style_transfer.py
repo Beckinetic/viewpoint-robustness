@@ -90,7 +90,7 @@ def get_features(image, model, layers=None):
                   '5': 'conv2_1',
                   '10': 'conv3_1',
                   '19': 'conv4_1',
-                  '21': 'conv4_2',  # content representation _output
+                  '21': 'conv4_2',  # content representation output
                   '28': 'conv5_1'}
 
     features = {}

@@ -50,7 +50,11 @@ def main():
     texture_bias_by_category = {label: [] for label in category_labels.keys()}
 
     for log_folder in log_folders:
-        result_path = os.path.join(log_dir, log_folder, cue_conflict_folder, 'results.pkl')
+        if config['log']['pasted']:
+            result_file_name = 'shape_bias_pasted.pkl'
+        else:
+            result_file_name = 'shape_bias.pkl'
+        result_path = os.path.join(log_dir, log_folder, cue_conflict_folder, result_file_name)
         with open(result_path, 'rb') as file:
             results = pickle.load(file)
 
@@ -68,7 +72,40 @@ def main():
         shape_bias = np.sqrt(total_shape_decision_count / overall_decision_count) * np.sqrt(total_shape_decision_count / all_decisions_count)
         texture_bias = np.sqrt(total_texture_decision_count / overall_decision_count) * np.sqrt(total_texture_decision_count / all_decisions_count)
 
-        model_names.append(log_folder)  # Use log_folder name as model identifier
+        label_mapping = {'combined_f_combined': 'combined, free view',
+                         'combined_r_combined': 'combined, restricted view',
+                         'combined_fx_combined': 'combined, fixed view',
+                         'meadow_f_f': 'meadow, free view',
+                         'meadow_r_f': 'meadow, restricted view',
+                         'meadow_fx_f': 'meadow, fixed view',
+                         'forest_f_f': 'forest, free view',
+                         'forest_r_f': 'forest, restricted view',
+                         'forest_fx_f': 'forest, fixed view',
+                         'desert_f_f': 'desert, free view',
+                         'desert_r_f': 'desert, restricted view',
+                         'desert_fx_f': 'desert, fixed view',
+                         'industrial_f_f': 'industrial area, free view',
+                         'industrial_r_f': 'industrial, restricted view',
+                         'industrial_fx_f': 'industrial, fixed view',
+                         'mixed_f_f_0.1': 'mixed, free view, r = 0.1',
+                         'mixed_r_f_0.1': 'mixed, restricted view, r = 0.1',
+                         'mixed_fx_f_0.1': 'mixed, fixed view, r = 0.1',
+                         'mixed_f_f_0.25': 'mixed, free view, r = 0.25',
+                         'mixed_r_f_0.25': 'mixed, restricted view, r = 0.25',
+                         'mixed_fx_f_0.25': 'mixed, fixed view, r = 0.25',
+                         'mixed_f_f_0.3': 'mixed, free view, r = 0.3',
+                         'mixed_r_f_0.3': 'mixed, restricted view, r = 0.3',
+                         'mixed_fx_f_0.3': 'mixed, fixed view, r = 0.3',
+                         'mixed_f_f_0.5': 'mixed, free view, r = 0.5',
+                         'mixed_r_f_0.5': 'mixed, restricted view, r = 0.5',
+                         'mixed_fx_f_0.5': 'mixed, fixed view, r = 0.5',
+                         'mixed_f_f_0.7': 'mixed, free view, r = 0.7',
+                         'mixed_r_f_0.7': 'mixed, restricted view, r = 0.7',
+                         'mixed_fx_f_0.7': 'mixed, fixed view, r = 0.7',
+                         'mixed_f_f_0.9': 'mixed, free view, r = 0.9',
+                         'mixed_r_f_0.9': 'mixed, restricted view, r = 0.9',
+                         'mixed_fx_f_0.9': 'mixed, fixed view, r = 0.9'}
+        model_names.append(label_mapping[log_folder])  # Use log_folder name as model identifier
         content_accuracies.append(content_accuracy)
         shape_biases.append(shape_bias)
         texture_biases.append(texture_bias)
@@ -87,6 +124,14 @@ def main():
     # Aggregate shape and texture biases by category across all models
     mean_shape_bias_by_category = {label: np.mean(biases) for label, biases in shape_bias_by_category.items()}
     mean_texture_bias_by_category = {label: np.mean(biases) for label, biases in texture_bias_by_category.items()}
+
+    # print everything
+    print(f"model names:{model_names}")
+    print(f"content accuracies:{content_accuracies}")
+    print(f"shape biases:{shape_biases}")
+    print(f"texture biases:{texture_biases}")
+    print(f"shape decisions:{total_shape_decisions}")
+    print(f"texture decisions:{total_texture_decisions}")
 
     # Plotting content accuracies
     plt.figure(figsize=(10, 6))

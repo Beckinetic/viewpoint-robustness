@@ -1,14 +1,27 @@
 data:
   root: ../data/cue_conflict_mixed
+  pasted: false
 
 model:
   model_folders:
-    - mixed_f_f_0.1
-    - mixed_f_f_0.25
-    - mixed_f_f_0.3
-    - mixed_f_f_0.5
-    - mixed_f_f_0.7
-    - mixed_f_f_0.9
+#    - mixed_f_f_0.1
+#    - mixed_f_f_0.25
+#    - mixed_f_f_0.3
+#    - mixed_f_f_0.5
+#    - mixed_f_f_0.7
+#    - mixed_f_f_0.9
+#    - mixed_r_f_0.1
+#    - mixed_r_f_0.25
+#    - mixed_r_f_0.3
+#    - mixed_r_f_0.5
+#    - mixed_r_f_0.7
+#    - mixed_r_f_0.9
+    - mixed_fx_f_0.1
+    - mixed_fx_f_0.25
+    - mixed_fx_f_0.3
+    - mixed_fx_f_0.5
+    - mixed_fx_f_0.7
+    - mixed_fx_f_0.9
 #    - combined_f_combined
 #    - combined_fx_combined
 #    - combined_r_combined

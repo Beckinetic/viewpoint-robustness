@@ -35,7 +35,10 @@ def main():
 
     # get cue-conflict dataset
     root = config['data']['root']
-    cue_conflict_path = os.path.join(root, 'output')
+    if config['data']['pasted']:
+        cue_conflict_path = os.path.join(root, 'pasted_output')
+    else:
+        cue_conflict_path = os.path.join(root, 'output')
     content_path = os.path.join(root, 'content')
 
     # get models and logs path
@@ -101,7 +104,11 @@ def main():
                   'total_decisions': total_decisions}
 
         os.makedirs(os.path.join(log_dir, os.path.basename(model_path), os.path.basename(root)), exist_ok=True)
-        save_path = os.path.join(log_dir, os.path.basename(model_path), os.path.basename(root), 'results.pkl')
+        if config['data']['pasted']:
+            save_file_name = 'shape_bias_pasted.pkl'
+        else:
+            save_file_name = 'shape_bias.pkl'
+        save_path = os.path.join(log_dir, os.path.basename(model_path), os.path.basename(root), save_file_name)
         with open(save_path, 'wb') as f:
             pickle.dump(result, f)
 
