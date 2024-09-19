@@ -96,7 +96,7 @@ def sample_dataset_by_instance(_root, sample_num, seed, _save, _output):
     """
     Sample dataset for training and testing by instances
     :param _root: root directory of dataset
-    :param sample_num: number of pictures per category
+    :param sample_num: number of pictures per instance
     :param _save: if True, save the sampled dataset
     :param _output: _output directory of sampled dataset
     :return:
