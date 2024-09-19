@@ -129,5 +129,28 @@ def sample_dataset_by_instance(_root, sample_num, seed, _save, _output):
             else:
                 sampled_labels[image_path] = labels[image_path]
 
+            # Read metadata from the original logs.json
+            original_metadata_path = os.path.join(os.path.dirname(image_path), 'logs.json')
+            with open(original_metadata_path, 'r') as metadata_file:
+                metadata = json.load(metadata_file)
+                image_metadata = next((item for item in metadata['configurations'] if
+                                       item['screenshotID'] == os.path.basename(image_path)), None)
+
+                if image_metadata:
+                    # Read or create the metadata file in the output directory
+                    output_metadata_path = os.path.join(_output, 'logs.json')
+                    if os.path.exists(output_metadata_path):
+                        with open(output_metadata_path, 'r') as out_metadata_file:
+                            output_metadata = json.load(out_metadata_file)
+                    else:
+                        output_metadata = {"configurations": []}
+
+                    # Add or update the metadata in the output directory
+                    output_metadata['configurations'].append(image_metadata)
+
+                    # Save the updated metadata
+                    with open(output_metadata_path, 'w') as out_metadata_file:
+                        json.dump(output_metadata, out_metadata_file, indent=4)
+
     print(f'Sampled images: {len(sampled_labels)} from {_root}')
     return sampled_labels

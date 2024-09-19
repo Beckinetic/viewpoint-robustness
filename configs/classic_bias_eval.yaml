@@ -1,6 +1,6 @@
 data:
   root: ../data/cue_conflict_mixed
-  pasted: false
+  pasted: true
 
 model:
   model_folders:

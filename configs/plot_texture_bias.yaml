@@ -34,12 +34,12 @@ log:
 #    - industrial_fx_f
 #    - desert_fx_f
   cue_conflict: cue_conflict_mixed
-  pasted: false
+  pasted: true
 
 model:
   model_name: resnet18
 
 plot:
-  prefix: mixed
+  prefix: mixed_pasted
   acc_min: 0
   acc_max: 1

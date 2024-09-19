@@ -3,6 +3,7 @@ import os
 import pickle
 import yaml
 from matplotlib import pyplot as plt
+import matplotlib.colors as mcolors
 import numpy as np
 
 
@@ -12,6 +13,34 @@ def parse_args():
     parser.add_argument('--log-dir', type=str, default='logs/', help='Directory to save logs')
     parser.add_argument('--plot-dir', type=str, default='plots/', help='Directory to save plots')
     return parser.parse_args()
+
+
+# Base color mapping for view angles
+view_angle_base_colors = {
+    'free view': 'skyblue',
+    'restricted view': 'salmon',
+    'fixed view': 'lightgreen'
+}
+
+
+def get_color_for_model(model_name):
+    # Extract the view type
+    for key in view_angle_base_colors.keys():
+        if key in model_name:
+            base_color = view_angle_base_colors[key]
+            break
+    else:
+        base_color = 'gray'  # Default color if no match is found
+
+    # Adjust hue based on the r value
+    if 'r =' in model_name:
+        r_value = float(model_name.split('r =')[-1])
+        r_value = min(max(r_value, 0), 1)  # Clamp r value between 0 and 1
+        color = mcolors.to_rgba(base_color)[:3]  # Exclude alpha channel
+        hsv_color = mcolors.rgb_to_hsv(color)
+        adjusted_color = mcolors.hsv_to_rgb((hsv_color[0], hsv_color[1], r_value))
+        return adjusted_color
+    return base_color
 
 
 def main():
@@ -69,8 +98,10 @@ def main():
         all_decisions_count = sum(all_decisions.values())
         overall_decision_count = total_shape_decision_count + total_texture_decision_count
 
-        shape_bias = np.sqrt(total_shape_decision_count / overall_decision_count) * np.sqrt(total_shape_decision_count / all_decisions_count)
-        texture_bias = np.sqrt(total_texture_decision_count / overall_decision_count) * np.sqrt(total_texture_decision_count / all_decisions_count)
+        shape_bias = np.sqrt(total_shape_decision_count / overall_decision_count) * np.sqrt(
+            total_shape_decision_count / all_decisions_count)
+        texture_bias = np.sqrt(total_texture_decision_count / overall_decision_count) * np.sqrt(
+            total_texture_decision_count / all_decisions_count)
 
         label_mapping = {'combined_f_combined': 'combined, free view',
                          'combined_r_combined': 'combined, restricted view',
@@ -135,7 +166,8 @@ def main():
 
     # Plotting content accuracies
     plt.figure(figsize=(10, 6))
-    plt.bar(model_names, content_accuracies, color='skyblue')
+    colors = [get_color_for_model(model) for model in model_names]
+    plt.bar(model_names, content_accuracies, color=colors)
     plt.xlabel('Model')
     plt.ylabel('Content Accuracy')
     plt.title('Content Accuracies of Different Models')
@@ -147,7 +179,7 @@ def main():
 
     # Plotting overall shape bias
     plt.figure(figsize=(10, 6))
-    plt.bar(model_names, shape_biases, color='salmon')
+    plt.bar(model_names, shape_biases, color=colors)
     plt.xlabel('Model')
     plt.ylabel('Overall Shape Bias')
     plt.title('Overall Shape Bias of Different Models')
@@ -158,7 +190,7 @@ def main():
 
     # Plotting overall texture bias
     plt.figure(figsize=(10, 6))
-    plt.bar(model_names, texture_biases, color='lightgreen')
+    plt.bar(model_names, texture_biases, color=colors)
     plt.xlabel('Model')
     plt.ylabel('Overall Texture Bias')
     plt.title('Overall Texture Bias of Different Models')
@@ -171,8 +203,8 @@ def main():
     plt.figure(figsize=(10, 6))
     width = 0.35
     indices = np.arange(len(model_names))
-    plt.bar(indices - width/2, total_shape_decisions, width, label='Shape Decisions', color='steelblue')
-    plt.bar(indices + width/2, total_texture_decisions, width, label='Texture Decisions', color='darkorange')
+    plt.bar(indices - width / 2, total_shape_decisions, width, label='Shape Decisions', color='steelblue')
+    plt.bar(indices + width / 2, total_texture_decisions, width, label='Texture Decisions', color='darkorange')
     plt.xlabel('Model')
     plt.ylabel('Decision Count')
     plt.title('Total Shape and Texture Decisions of Different Models')
