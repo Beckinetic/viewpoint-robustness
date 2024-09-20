@@ -1,22 +1,18 @@
 import argparse
+import glob
 import os
-from io import BytesIO
 
-import requests
 import yaml
-from PIL.Image import Image
-from torchvision import transforms
 
-from src.model.models import get_device
 
 import numpy as np
 import skimage as sk
-import torch
 
 from skimage.filters import gaussian
 from io import BytesIO
-from wand.image import Image as WandImage
-from wand.api import library as wandlibrary
+
+from tqdm import tqdm
+
 import ctypes
 from PIL import Image as PILImage
 import cv2
@@ -25,6 +21,9 @@ from scipy.ndimage.interpolation import map_coordinates
 import warnings
 
 warnings.simplefilter("ignore", UserWarning)
+
+
+IMG_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm']
 
 
 #=================== Distortion Helper Functions ===================
@@ -50,19 +49,6 @@ def disk(radius, alias_blur=0.1, dtype=np.float32):
 
     # supersample disk to antialias
     return cv2.GaussianBlur(aliased_disk, ksize=ksize, sigmaX=alias_blur)
-
-
-# Tell Python about the C method
-wandlibrary.MagickMotionBlurImage.argtypes = (ctypes.c_void_p,  # wand
-                                              ctypes.c_double,  # radius
-                                              ctypes.c_double,  # sigma
-                                              ctypes.c_double)  # angle
-
-
-# Extend wand.image.Image class to include method signature
-class MotionImage(WandImage):
-    def motion_blur(self, radius=0.0, sigma=0.0, angle=0.0):
-        wandlibrary.MagickMotionBlurImage(self.wand, radius, sigma, angle)
 
 
 # modification of https://github.com/FLHerne/mapgen/blob/master/diamondsquare.py
@@ -174,7 +160,7 @@ def speckle_noise(x, severity=1):
 def gaussian_blur(x, severity=1):
     c = [1, 2, 3, 4, 6][severity - 1]
 
-    x = gaussian(np.array(x) / 255., sigma=c, multichannel=True)
+    x = gaussian(np.array(x) / 255., sigma=c, channel_axis=-1)
     return np.clip(x, 0, 1) * 255
 
 
@@ -182,7 +168,7 @@ def glass_blur(x, severity=1):
     # sigma, max_delta, iterations
     c = [(0.7, 1, 2), (0.9, 2, 1), (1, 2, 3), (1.1, 3, 2), (1.5, 4, 2)][severity - 1]
 
-    x = np.uint8(gaussian(np.array(x) / 255., sigma=c[0], multichannel=True) * 255)
+    x = np.uint8(gaussian(np.array(x) / 255., sigma=c[0], channel_axis=-1) * 255)
 
     # locally shuffle pixels
     for i in range(c[2]):
@@ -193,7 +179,7 @@ def glass_blur(x, severity=1):
                 # swap
                 x[h, w], x[h_prime, w_prime] = x[h_prime, w_prime], x[h, w]
 
-    return np.clip(gaussian(x / 255., sigma=c[0], multichannel=True), 0, 1) * 255
+    return np.clip(gaussian(x / 255., sigma=c[0], channel_axis=-1), 0, 1) * 255
 
 
 def defocus_blur(x, severity=1):
@@ -211,21 +197,38 @@ def defocus_blur(x, severity=1):
 
 
 def motion_blur(x, severity=1):
+    # Define severity levels for radius (kernel size) and angle range for motion blur
     c = [(10, 3), (15, 5), (15, 8), (15, 12), (20, 15)][severity - 1]
 
-    output = BytesIO()
-    x.save(output, format='PNG')
-    x = MotionImage(blob=output.getvalue())
+    # Create a random angle for the motion blur effect
+    angle = np.random.uniform(-45, 45)
 
-    x.motion_blur(radius=c[0], sigma=c[1], angle=np.random.uniform(-45, 45))
+    # Convert image to a NumPy array if it's not already
+    if isinstance(x, PILImage.Image):
+        x = np.array(x)
 
-    x = cv2.imdecode(np.fromstring(x.make_blob(), np.uint8),
-                     cv2.IMREAD_UNCHANGED)
+    # Set up the motion blur kernel
+    kernel_size = c[0]
+    kernel = np.zeros((kernel_size, kernel_size))
 
-    if x.shape != (224, 224):
-        return np.clip(x[..., [2, 1, 0]], 0, 255)  # BGR to RGB
-    else:  # greyscale to RGB
-        return np.clip(np.array([x, x, x]).transpose((1, 2, 0)), 0, 255)
+    # Create a linear motion blur kernel
+    kernel[int((kernel_size - 1) / 2), :] = np.ones(kernel_size)
+    kernel = kernel / kernel_size
+
+    # Rotate the kernel to apply motion blur in different directions
+    center = (kernel_size // 2, kernel_size // 2)
+    rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1)
+    kernel = cv2.warpAffine(kernel, rotation_matrix, (kernel_size, kernel_size))
+
+    # Apply the motion blur kernel to the image
+    output = cv2.filter2D(x, -1, kernel)
+
+    # If the image is grayscale, convert it to RGB
+    if len(output.shape) == 2:
+        output = np.stack([output, output, output], axis=-1)
+
+    # Clip values to ensure valid pixel range and convert back to uint8
+    return np.clip(output, 0, 255).astype(np.uint8)
 
 
 def zoom_blur(x, severity=1):
@@ -249,7 +252,7 @@ def fog(x, severity=1):
 
     x = np.array(x) / 255.
     max_val = x.max()
-    x += c[0] * plasma_fractal(wibbledecay=c[1])[:224, :224][..., np.newaxis]
+    x += c[0] * plasma_fractal(wibbledecay=c[1])[:256, :256][..., np.newaxis]
     return np.clip(x * max_val / (max_val + c[0]), 0, 1) * 255
 
 
@@ -260,41 +263,73 @@ def frost(x, severity=1):
          (0.65, 0.7),
          (0.6, 0.75)][severity - 1]
     idx = np.random.randint(5)
-    filename = ['./frost1.png', './frost2.png', './frost3.png', './frost4.jpg', './frost5.jpg', './frost6.jpg'][idx]
+    filename = ['frost1.png', 'frost2.png', 'frost3.png', 'frost4.jpg', 'frost5.jpg', 'frost6.jpg'][idx]
     frost = cv2.imread(filename)
+
     # randomly crop and convert to rgb
-    x_start, y_start = np.random.randint(0, frost.shape[0] - 224), np.random.randint(0, frost.shape[1] - 224)
-    frost = frost[x_start:x_start + 224, y_start:y_start + 224][..., [2, 1, 0]]
+    x_start, y_start = np.random.randint(0, frost.shape[0] - 256), np.random.randint(0, frost.shape[1] - 256)
+    frost = frost[x_start:x_start + 256, y_start:y_start + 256][..., [2, 1, 0]]
 
     return np.clip(c[0] * np.array(x) + c[1] * frost, 0, 255)
 
 
+def clipped_zoom(img, zoom_factor):
+    # Clipping zoom function to simulate zooming in and out
+    h, w = img.shape[:2]
+    # Crop the image according to the zoom factor
+    ch = int(np.round(h / zoom_factor))
+    cw = int(np.round(w / zoom_factor))
+    top = (h - ch) // 2
+    left = (w - cw) // 2
+
+    img_cropped = img[top:top + ch, left:left + cw]
+
+    # Resize it back to original dimensions
+    return cv2.resize(img_cropped, (w, h), interpolation=cv2.INTER_LINEAR)
+
+
 def snow(x, severity=1):
+    # Parameters based on severity level
     c = [(0.1, 0.3, 3, 0.5, 10, 4, 0.8),
          (0.2, 0.3, 2, 0.5, 12, 4, 0.7),
          (0.55, 0.3, 4, 0.9, 12, 8, 0.7),
          (0.55, 0.3, 4.5, 0.85, 12, 8, 0.65),
          (0.55, 0.3, 2.5, 0.85, 12, 12, 0.55)][severity - 1]
 
+    # Normalize the input image
     x = np.array(x, dtype=np.float32) / 255.
-    snow_layer = np.random.normal(size=x.shape[:2], loc=c[0], scale=c[1])  # [:2] for monochrome
 
+    # Create a snow layer using random noise
+    snow_layer = np.random.normal(size=x.shape[:2], loc=c[0], scale=c[1])
+
+    # Apply zoom effect to the snow layer
     snow_layer = clipped_zoom(snow_layer[..., np.newaxis], c[2])
+
+    # Apply threshold to simulate snowflakes
     snow_layer[snow_layer < c[3]] = 0
 
-    snow_layer = PILImage.fromarray((np.clip(snow_layer.squeeze(), 0, 1) * 255).astype(np.uint8), mode='L')
-    output = BytesIO()
-    snow_layer.save(output, format='PNG')
-    snow_layer = MotionImage(blob=output.getvalue())
+    # Convert snow_layer to uint8 for OpenCV processing
+    snow_layer = (np.clip(snow_layer.squeeze(), 0, 1) * 255).astype(np.uint8)
 
-    snow_layer.motion_blur(radius=c[4], sigma=c[5], angle=np.random.uniform(-135, -45))
+    # Apply motion blur to the snow layer using OpenCV
+    kernel_size = int(c[4])
+    kernel_motion_blur = np.zeros((kernel_size, kernel_size))
+    kernel_motion_blur[int((kernel_size - 1) / 2), :] = np.ones(kernel_size)
+    kernel_motion_blur = kernel_motion_blur / kernel_size
+    snow_layer = cv2.filter2D(snow_layer, -1, kernel_motion_blur)
 
-    snow_layer = cv2.imdecode(np.fromstring(snow_layer.make_blob(), np.uint8),
-                              cv2.IMREAD_UNCHANGED) / 255.
-    snow_layer = snow_layer[..., np.newaxis]
+    # Normalize the snow layer for blending
+    snow_layer = snow_layer / 255.0
+    snow_layer = snow_layer[..., np.newaxis]  # Add channel back
 
-    x = c[6] * x + (1 - c[6]) * np.maximum(x, cv2.cvtColor(x, cv2.COLOR_RGB2GRAY).reshape(224, 224, 1) * 1.5 + 0.5)
-    return np.clip(x + snow_layer + np.rot90(snow_layer, k=2), 0, 1) * 255
+    # Blend the snow layer with the original image
+    grayscale_x = cv2.cvtColor(x, cv2.COLOR_RGB2GRAY).reshape(x.shape[0], x.shape[1], 1)
+    blended_image = c[6] * x + (1 - c[6]) * np.maximum(x, grayscale_x * 1.5 + 0.5)
+
+    # Add the snow layer to the blended image
+    result = np.clip(blended_image + snow_layer + np.rot90(snow_layer, k=2), 0, 1) * 255
+
+    return result.astype(np.uint8)
 
 
 def spatter(x, severity=1):
@@ -440,10 +475,34 @@ def parse_args():
     return parser.parse_args()
 
 
+def is_image_file(filename):
+    """Checks if a file is an image.
+    Args:
+        filename (string): path to a file
+    Returns:
+        bool: True if the filename ends with a known image extension
+    """
+    filename_lower = filename.lower()
+    return any(filename_lower.endswith(ext) for ext in IMG_EXTENSIONS)
+
+
 def load_image(image_path):
     with open(image_path, 'rb') as f:
-        img = Image.open(f)
+        img = PILImage.open(f)
         return img.convert('RGB')
+
+
+def apply_distortion(image_paths, output_folder, distortion_function, severity):
+    for image_path in image_paths:
+        image = load_image(image_path)
+        output = distortion_function(image, severity)
+        # Check if the output is in PIL format (as with jpeg_compression and pixelate)
+        if isinstance(output, PILImage.Image):
+            output_img = output
+        else:
+            output_img = PILImage.fromarray(output.astype(np.uint8))
+
+        output_img.save(os.path.join(output_folder, image_path.split('/')[-1]))
 
 
 def main():
@@ -452,25 +511,67 @@ def main():
     with open(args.config, 'r') as file:
         config = yaml.safe_load(file)
 
-    device = get_device()
     root = config['data']['root']
     distortion_types = config['distortion_types']
 
-    images_paths = "/".join([root, 'content'])
+    original_image_folder = "/".join([root, 'content'])
+    image_paths = glob.glob(original_image_folder + '/*')
+
+    # verify all the image paths
+    valid_image_paths = []
+    for image_path in image_paths:
+        image_filename = os.path.basename(image_path)
+        if is_image_file(image_filename):
+            valid_image_paths.append(image_path)
+    image_paths = valid_image_paths
+
     # distorted images are created in 5 levels of severities by default
     severities = range(1,6)
 
-    for distortion_type in distortion_types:
+    for distortion_type in tqdm(distortion_types):
         for severity in severities:
             output_folder = os.path.join(root, distortion_type, str(severity))
             os.makedirs(output_folder, exist_ok=True)
             match distortion_type:
                 case 'gaussian_noise':
-                    for image_path in images_paths:
-                        image = load_image(image_path)
-                        output = gaussian_noise(image)
+                    apply_distortion(image_paths, output_folder, gaussian_noise, severity)
+                case 'shot_noise':
+                    apply_distortion(image_paths, output_folder, shot_noise, severity)
+                case 'impulse_noise':
+                    apply_distortion(image_paths, output_folder, impulse_noise, severity)
+                case 'speckle_noise':
+                    apply_distortion(image_paths, output_folder, speckle_noise, severity)
+                case 'gaussian_blur':
+                    apply_distortion(image_paths, output_folder, gaussian_blur, severity)
+                case 'glass_blur':
+                    apply_distortion(image_paths, output_folder, glass_blur, severity)
+                case 'defocus_blur':
+                    apply_distortion(image_paths, output_folder, defocus_blur, severity)
+                case 'motion_blur':
+                    apply_distortion(image_paths, output_folder, motion_blur, severity)
+                case 'zoom_blur':
+                    apply_distortion(image_paths, output_folder, zoom_blur, severity)
+                case 'fog':
+                    apply_distortion(image_paths, output_folder, fog, severity)
+                case 'frost':
+                    apply_distortion(image_paths, output_folder, frost, severity)
+                case 'snow':
+                    apply_distortion(image_paths, output_folder, snow, severity)
+                case 'spatter':
+                    apply_distortion(image_paths, output_folder, spatter, severity)
+                case 'contrast':
+                    apply_distortion(image_paths, output_folder, contrast, severity)
+                case 'brightness':
+                    apply_distortion(image_paths, output_folder, brightness, severity)
+                case 'saturate':
+                    apply_distortion(image_paths, output_folder, saturate, severity)
+                case 'jpeg_compression':
+                    apply_distortion(image_paths, output_folder, jpeg_compression, severity)
+                case 'pixelate':
+                    apply_distortion(image_paths, output_folder, pixelate, severity)
+                case 'elastic_transform':
+                    apply_distortion(image_paths, output_folder, elastic_transform, severity)
 
 
-
-
-
+if __name__ == '__main__':
+    main()
