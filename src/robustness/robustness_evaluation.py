@@ -147,7 +147,7 @@ def main():
                         f"Distortion accuracy on epoch {epoch}, {distortion_type}, severity: {severity}: {distortion_acc[str(epoch)][distortion_type][str(severity)]}")
 
             # path to save results
-            log_model_epoch_folder = os.path.join(log_dir, model_folder, 'robustness', str(epoch))
+            log_model_epoch_folder = os.path.join(log_dir, model_folder, 'robustness', str(epoch), viewpoint)
             save_path_content_acc = os.path.join(log_model_epoch_folder, 'content_acc.pkl')
             save_path_distortion_acc = os.path.join(log_model_epoch_folder, 'distortion_acc.pkl')
 
