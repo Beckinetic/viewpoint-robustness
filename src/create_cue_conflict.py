@@ -50,7 +50,6 @@ def main():
             for ii, content_path in enumerate(content_paths):
                 # load content
                 content = load_image(content_path).to(device)
-                # content_id = os.path.basename(content_path).split('.')[0].split('_')[0]
                 content_name = os.path.basename(content_path).split('.')[0]
 
                 for k, style_label in enumerate(style_subset):

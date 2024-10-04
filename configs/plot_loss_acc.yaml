@@ -4,14 +4,13 @@ log:
     - r
     - fx
   res:
-    - f
-#    - combined
+    - combined
   background:
-    - meadow
-    - forest
-    - industrial
-    - desert
-#    - combined
+#    - meadow
+#    - forest
+#    - industrial
+#    - desert
+    - combined
 
 model:
   model_name: resnet18

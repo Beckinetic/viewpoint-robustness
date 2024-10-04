@@ -1,0 +1,19 @@
+model:
+  model_folders:
+    - combined_f_combined
+    - combined_r_combined
+    - combined_fx_combined
+  model_name: resnet18
+
+data:
+  root: ../data/
+  views:
+    - f
+    - r
+    - fx
+  backgrounds:
+    - meadow
+    - forest
+    - desert
+    - industrial
+  resolution: f

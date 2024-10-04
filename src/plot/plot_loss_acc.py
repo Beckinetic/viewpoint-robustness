@@ -199,8 +199,69 @@ def plot_loss_acc():
                 plt.savefig(save_path)
 
 
+def plot_multival_loss_acc():
+    args = parse_args()
+    config = args.config
+    with open(config, 'r') as file:
+        config = yaml.safe_load(file)
+
+    model_name = config['model']['model_name']
+    for background in config['log']['background']:
+        for view in config['log']['view']:
+            for res in config['log']['res']:
+                log_folder = '_'.join([background, view, res])
+                result_path = os.path.join(args.log_dir, log_folder, '_'.join([model_name, 'log', 'data.pkl']))
+                with open(result_path, 'rb') as f:
+                    result = pickle.load(f)
+
+                train_losses = result['tl']
+                train_accs = result['ta']
+                val_losses = result['vl']
+                val_accs = result['va']
+
+                epochs = range(1, len(train_losses) + 1)
+                all_views = ['f', 'r', 'fx']
+                view_colors = {
+                    'f': 'blue',
+                    'r': 'red',
+                    'fx': 'green',
+                }
+                other_views = [item for item in all_views if item != view]
+
+                # edit from here
+                fig, ax1 = plt.subplots()
+                ax2 = ax1.twinx()
+                ax1.plot(epochs, train_losses, label='Train loss', color='grey')
+                ax1.plot(epochs, val_losses[0], label=f'Val loss {view}', color=view_colors[view])
+                ax1.plot(epochs, val_losses[1], label=f'Val loss {other_views[0]}', color=view_colors[other_views[0]])
+                ax1.plot(epochs, val_losses[2], label=f'Val loss {other_views[1]}', color=view_colors[other_views[1]])
+                ax1.set_xlabel('Epoch')
+                ax1.set_ylabel('Loss')
+                ax1.set_ylim([config['plot']['loss_min'], config['plot']['loss_max']])
+
+                ax2.plot(epochs, train_accs, label='Train acc', color='grey', linestyle='-')
+                ax2.plot(epochs, val_accs[0], label=f'Val acc {view}', color=view_colors[view], linestyle='dashed')
+                ax2.plot(epochs, val_accs[1], label=f'Val acc {other_views[0]}', color=view_colors[other_views[0]], linestyle='dashed')
+                ax2.plot(epochs, val_accs[2], label=f'Val acc {other_views[1]}', color=view_colors[other_views[1]], linestyle='dashed')
+                ax2.set_ylabel('Accuracy')
+                ax2.set_ylim([config['plot']['acc_min'], config['plot']['acc_max']])
+
+                ax1.legend(loc='lower right')
+                ax2.legend(loc='upper right')
+                plt.tight_layout()
+                title = '_'.join([model_name, log_folder])
+                plt.title(title)
+
+                os.makedirs(os.path.join(args.plot_dir, log_folder), exist_ok=True)
+                save_path = os.path.join(args.plot_dir, log_folder, '_'.join([title, 'multival_loss_acc.png']))
+                plt.savefig(save_path)
+
+
+
+
 if __name__ == '__main__':
     # plot_loss_acc()
-    plot_view_loss()
-    plot_view_acc()
+    # plot_view_loss()
+    # plot_view_acc()
+    plot_multival_loss_acc()
     print('Done')

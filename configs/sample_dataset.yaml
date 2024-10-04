@@ -1,16 +1,16 @@
 data:
   background:
-    - meadow
-    - forest
-    - desert
-    - industrial
+    - ood_meadow
+    - ood_forest
+    - ood_desert
+    - ood_industrial
   view:
-    - f
+#   - f
 #    - r
-#    - fx
+    - fx
   res:
     - f
 
 sample:
-  sample_num: 1
-  output: cue_conflict_mixed/content
+  sample_num: 5
+  output: robustness/ood_fx/content

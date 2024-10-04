@@ -1,12 +1,9 @@
 data:
   root: ../data/robustness
-  viewpoints:
-    - ood_f_background
-    - ood_f_object
-    - ood_r_background
-    - ood_r_object
-    - ood_fx_background
-    - ood_fx_object
+  bases:
+#    - ood_f
+    - ood_r
+    - ood_fx
 
 distortion_types:
   - gaussian_noise
@@ -28,10 +25,3 @@ distortion_types:
   - jpeg_compression
   - pixelate
   - elastic_transform
-
-model:
-  model_name: resnet18
-  model_folders:
-    - combined_f_combined
-    - combined_r_combined
-    - combined_fx_combined

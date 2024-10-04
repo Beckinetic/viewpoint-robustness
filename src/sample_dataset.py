@@ -27,7 +27,7 @@ if __name__ == '__main__':
         for view in config['data']['view']:
             for res in config['data']['res']:
                 root = os.path.join(args.dataset, '_'.join([background, view, res]))
-                sample_dataset_by_category(root, config['sample']['sample_num'], 42, True, output)
+                sample_dataset_by_category(root, config['sample']['sample_num'], 123, True, output)
 
     create_labels(output)
     print('Done')
