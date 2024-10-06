@@ -430,8 +430,8 @@ def jpeg_compression(x, severity=1):
 def pixelate(x, severity=1):
     c = [0.6, 0.5, 0.4, 0.3, 0.25][severity - 1]
 
-    x = x.resize((int(224 * c), int(224 * c)), PILImage.BOX)
-    x = x.resize((224, 224), PILImage.BOX)
+    x = x.resize((int(256 * c), int(256 * c)), PILImage.BOX)
+    x = x.resize((256, 256), PILImage.BOX)
 
     return x
 

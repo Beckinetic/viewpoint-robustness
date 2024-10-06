@@ -1,5 +1,5 @@
 data:
-  root: ../data/robustness/ood_fx
+  root: ../data/robustness/ood_f
 
 distortion_types:
   - gaussian_noise
