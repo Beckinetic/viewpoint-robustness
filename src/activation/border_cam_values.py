@@ -90,14 +90,14 @@ def main():
                         # logging.info(f'Cam shape {cam.shape}')
                         # logging.info(f'Interior shape {interior_mask.shape}')
                         # logging.info(f'Exterior shape {exterior_mask.shape}')
-                        interior_cam_values = np.multiply(cam, interior_mask).flatten()
-                        exterior_cam_values = np.multiply(cam, exterior_mask).flatten()
-                        border_cam_values = np.multiply(cam, border_mask).flatten()
+                        interior_cam_values = cam[interior_mask].flatten()
+                        exterior_cam_values = cam[exterior_mask].flatten()
+                        border_cam_values = cam[border_mask].flatten()
 
                         # (3) save the CAM values
-                        all_interior_cam_values.extend(interior_cam_values)
-                        all_exterior_cam_values.extend(exterior_cam_values)
-                        all_border_cam_values.extend(border_cam_values)
+                        all_interior_cam_values.append(interior_cam_values)
+                        all_exterior_cam_values.append(exterior_cam_values)
+                        all_border_cam_values.append(border_cam_values)
                     else:
                         logging.warning(f'Analysis aborted for {image_filename}')
 
@@ -108,59 +108,110 @@ def main():
                 # }
                 del cams
 
-                # (3) Run statistical analysis on the collected CAM values
-                interior_mean = np.mean(all_interior_cam_values)
-                border_mean = np.mean(all_border_cam_values)
-                exterior_mean = np.mean(all_exterior_cam_values)
+                # (1) Calculate the mean CAM values for each image and store in new lists
+                interior_means_per_image = [np.mean(cam_values) for cam_values in all_interior_cam_values]
+                border_means_per_image = [np.mean(cam_values) for cam_values in all_border_cam_values]
+                exterior_means_per_image = [np.mean(cam_values) for cam_values in all_exterior_cam_values]
 
-                # Compare distributions using t-test
-                t_test_interior_vs_exterior = stats.ttest_ind(all_interior_cam_values, all_exterior_cam_values)
-                t_test_interior_vs_border = stats.ttest_ind(all_interior_cam_values, all_border_cam_values)
-                t_test_exterior_vs_border = stats.ttest_ind(all_exterior_cam_values, all_border_cam_values)
+                interior_pixels_per_image = [len(cam_values) for cam_values in all_interior_cam_values]
+                border_pixels_per_image = [len(cam_values) for cam_values in all_border_cam_values]
+                exterior_pixels_per_image = [len(cam_values) for cam_values in all_exterior_cam_values]
 
+                # (2) Calculate the global mean of each list
+                global_interior_mean = np.mean(interior_pixels_per_image)
+                global_border_mean = np.mean(border_pixels_per_image)
+                global_exterior_mean = np.mean(exterior_pixels_per_image)
+
+                mean_cams = {
+                    'image_means': {
+                        'interior_means_per_image': interior_means_per_image,
+                        'border_means_per_image': border_means_per_image,
+                        'exterior_means_per_image': exterior_means_per_image
+                    },
+                    'pixels': {
+                        'interior_pixels_per_image': interior_pixels_per_image,
+                        'border_pixels_per_image': border_pixels_per_image,
+                        'exterior_pixels_per_image': exterior_pixels_per_image
+                    },
+                    'global_means': {
+                        'global_interior_mean': global_interior_mean,
+                        'global_border_mean': global_border_mean,
+                        'global_exterior_mean': global_exterior_mean
+                    },
+                }
+
+                mean_cams_save_path = os.path.join(log_dir, model_folder, 'activations', str(epoch), view, 'mean_cams.pkl')
+                os.makedirs(os.path.dirname(mean_cams_save_path), exist_ok=True)
+                with open(mean_cams_save_path, 'wb') as f:
+                    pickle.dump(mean_cams, f)
+                del interior_means_per_image, border_means_per_image, exterior_means_per_image
+                del interior_pixels_per_image, border_pixels_per_image, exterior_pixels_per_image
+                # del all_interior_cam_values, all_border_cam_values, all_exterior_cam_values
+                logging.info(f'Saved mean_cams')
+
+                # Flatten the lists of CAM values for global comparison
+                flattened_interior_cams = [item for sublist in all_interior_cam_values for item in sublist]
+                del all_interior_cam_values
+                flattened_border_cams = [item for sublist in all_border_cam_values for item in sublist]
+                del all_border_cam_values
+                flattened_exterior_cams = [item for sublist in all_exterior_cam_values for item in sublist]
+                del all_exterior_cam_values
+
+                # (3) Compare distributions using t-tests between interior, border, and exterior regions
+                t_test_interior_vs_exterior = stats.ttest_ind(flattened_interior_cams, flattened_exterior_cams)
+                t_test_interior_vs_border = stats.ttest_ind(flattened_interior_cams, flattened_border_cams)
+                t_test_exterior_vs_border = stats.ttest_ind(flattened_exterior_cams, flattened_border_cams)
+
+                # (4) Save the statistics, including the means and test results
                 statistics = {
-                    'interior_mean': interior_mean,
-                    'border_mean': border_mean,
-                    'exterior_mean': exterior_mean,
-                    't_test_interior_vs_exterior': {
-                        'statistic': t_test_interior_vs_exterior.statistic,
-                        'pvalue': t_test_interior_vs_exterior.pvalue
-                    },
-                    't_test_interior_vs_border': {
-                        'statistic': t_test_interior_vs_border.statistic,
-                        'pvalue': t_test_interior_vs_border.pvalue
-                    },
-                    't_test_exterior_vs_border': {
-                        'statistic': t_test_exterior_vs_border.statistic,
-                        'pvalue': t_test_exterior_vs_border.pvalue
+                    't_tests': {
+                        't_test_interior_vs_exterior': {
+                            'statistic': t_test_interior_vs_exterior.statistic,
+                            'pvalue': t_test_interior_vs_exterior.pvalue
+                        },
+                        't_test_interior_vs_border': {
+                            'statistic': t_test_interior_vs_border.statistic,
+                            'pvalue': t_test_interior_vs_border.pvalue
+                        },
+                        't_test_exterior_vs_border': {
+                            'statistic': t_test_exterior_vs_border.statistic,
+                            'pvalue': t_test_exterior_vs_border.pvalue
+                        }
                     }
                 }
 
-                stats_save_path = os.path.join(log_dir, model_folder, 'activations', str(epoch), view, 'partitioned_cams_stats.json')
-                with open(stats_save_path, 'w') as stats_file:
-                    json.dump(statistics, stats_file, indent=4)
+                # Save the statistics as a pickle file
+                stats_save_path = os.path.join(log_dir, model_folder, 'activations', str(epoch),
+                                               'partitioned_cams_stats.pkl')
+                os.makedirs(os.path.dirname(stats_save_path), exist_ok=True)
+                with open(stats_save_path, 'wb') as stats_file:
+                    pickle.dump(statistics, stats_file)
+                logging.info(f'Saved statistics')
 
-                logging.info(f"Model: {model_folder}, Epoch: {epoch}, View: {view}")
-                logging.info(f"Interior vs Exterior: {t_test_interior_vs_exterior}")
-                logging.info(f"Interior vs Border: {t_test_interior_vs_border}")
-                logging.info(f"Exterior vs Border: {t_test_exterior_vs_border}")
+                logging.info(f"Model: {model_folder}, Epoch: {epoch}")
+                logging.info(f"Global Interior Mean: {global_interior_mean}")
+                logging.info(f"Global Exterior Mean: {global_exterior_mean}")
+                logging.info(f"Global Border Mean: {global_border_mean}")
+                logging.info(f"Interior vs Exterior T-test: {t_test_interior_vs_exterior}")
+                logging.info(f"Interior vs Border T-test: {t_test_interior_vs_border}")
+                logging.info(f"Exterior vs Border T-test: {t_test_exterior_vs_border}")
                 logging.info("-------------------------------------------------------")
 
-                interior_save_path = os.path.join(log_dir, model_folder, 'activations', str(epoch), view, 'interior_cams.pkl')
-                with open(interior_save_path, 'wb') as f:
-                    pickle.dump(all_interior_cam_values, f)
-                del all_interior_cam_values
-                logging.info(f'Interior CAM saved at {interior_save_path}')
-                border_save_path = os.path.join(log_dir, model_folder, 'activations', str(epoch), view, 'border_cams.pkl')
-                with open(border_save_path, 'wb') as f:
-                    pickle.dump(all_border_cam_values, f)
-                del all_border_cam_values
-                logging.info(f'Border CAM saved at {border_save_path}')
-                exterior_save_path = os.path.join(log_dir, model_folder, 'activations', str(epoch), view, 'exterior_cams.pkl')
-                with open(exterior_save_path, 'wb') as f:
-                    pickle.dump(all_exterior_cam_values, f)
-                del all_exterior_cam_values
-                logging.info(f'Exterior CAM saved at {exterior_save_path}')
+                # interior_save_path = os.path.join(log_dir, model_folder, 'activations', str(epoch), view, 'interior_cams.pkl')
+                # with open(interior_save_path, 'wb') as f:
+                #     pickle.dump(all_interior_cam_values, f)
+                # del all_interior_cam_values
+                # logging.info(f'Interior CAM saved at {interior_save_path}')
+                # border_save_path = os.path.join(log_dir, model_folder, 'activations', str(epoch), view, 'border_cams.pkl')
+                # with open(border_save_path, 'wb') as f:
+                #     pickle.dump(all_border_cam_values, f)
+                # del all_border_cam_values
+                # logging.info(f'Border CAM saved at {border_save_path}')
+                # exterior_save_path = os.path.join(log_dir, model_folder, 'activations', str(epoch), view, 'exterior_cams.pkl')
+                # with open(exterior_save_path, 'wb') as f:
+                #     pickle.dump(all_exterior_cam_values, f)
+                # del all_exterior_cam_values
+                # logging.info(f'Exterior CAM saved at {exterior_save_path}')
 
 
 if __name__ == '__main__':
