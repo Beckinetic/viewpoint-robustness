@@ -1,0 +1,28 @@
+data:
+  test:
+    batch_size: 32
+    num_classes: 32
+    view:
+      - er
+      - cr
+    res:
+      - f
+    background:
+      - meadow
+      - forest
+      - desert
+      - industrial
+
+model:
+  backbone: resnet18
+  to_test:
+    view:
+      - f
+      - r
+      - fx
+    res:
+      - combined
+    background:
+      - combined
+    max_epoch: 30
+

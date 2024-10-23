@@ -65,3 +65,7 @@ plot:
     - pixelate
     - elastic_transform
   max_severity: 5
+  cam_types:
+    - interior
+    - border
+    - exterior

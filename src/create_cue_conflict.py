@@ -6,9 +6,9 @@ import sys
 import yaml
 from tqdm import tqdm
 
-from texture_shape_bias.style_transfer import read_json_file, divide_labels, find_filenames_by_label, load_image, \
+from src.texture_shape_bias.style_transfer import read_json_file, divide_labels, find_filenames_by_label, load_image, \
     style_transfer
-from model.models import get_device
+from src.model.models import get_device
 
 
 def parse_args():

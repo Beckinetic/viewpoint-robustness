@@ -15,7 +15,7 @@ def create_labels(root_dir):
     :return: labels path
     """
     image_paths = glob.glob(root_dir + '/*.png')
-    with open('../objaverse/parsed_lvis_annotations.json') as f:
+    with open('objaverse/parsed_lvis_annotations.json') as f:
         annotations = json.load(f)
 
     labels = {}

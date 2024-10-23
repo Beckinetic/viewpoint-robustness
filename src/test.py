@@ -1,0 +1,166 @@
+import argparse
+import logging
+import os
+import pickle
+
+import torch
+import yaml
+from torch.utils.data import ConcatDataset
+from torchvision import transforms
+from tqdm import tqdm
+
+from src.data.create_dataset import create_dataset, train_val_test_split
+from src.model.models import get_model, get_device
+
+logging.basicConfig(level=logging.INFO)
+
+parser = argparse.ArgumentParser(description='Training script')
+parser.add_argument('config', type=str, help='Path to the configuration file')
+parser.add_argument('--data-dir', type=str, default='data/', help='Directory to fetch the data')
+parser.add_argument('--log-dir', type=str, default='logs/', help='Directory to save logs')
+parser.add_argument('--model-dir', type=str, default='models/', help='Directory to save models')
+args = parser.parse_args()
+
+data_dir = args.data_dir
+log_dir = args.log_dir
+model_dir = args.model_dir
+
+with open(args.config, 'r') as file:
+    config = yaml.safe_load(file)
+    
+batch_size = config['data']['test']['batch_size']
+num_classes = config['data']['test']['num_classes']
+test_views = config['data']['test']['view']
+test_res = config['data']['test']['res']
+test_backgrounds = config['data']['test']['background']
+
+backbone = config['model']['backbone']
+to_test_views = config['model']['to_test']['view']
+to_test_res = config['model']['to_test']['res']
+to_test_backgrounds = config['model']['to_test']['background']
+max_epoch = config['model']['to_test']['max_epoch']
+
+device = get_device()
+
+
+def prepare_test_data(data_folder, if_split=True):
+    data_path = os.path.join(data_dir, data_folder)
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+    dataset = create_dataset(data_path, label_path=None, transform=transform)
+
+    if if_split:
+        train_dataset, val_dataset = train_val_test_split(dataset)
+        return val_dataset
+    else:
+        return dataset
+
+
+def test_model(model, test_dataloader):
+    model.eval()
+    correct = 0
+    total = 0
+    test_loss = 0.0
+
+    with torch.no_grad():  # No need to track gradients during testing
+        for data, targets in tqdm(test_dataloader):
+            data, targets = data.to(device), targets.to(device)
+            outputs = model(data)
+            loss = torch.nn.functional.cross_entropy(outputs, targets)
+            test_loss += loss.item() * data.size(0)  # Accumulate loss
+            _, predicted = torch.max(outputs, 1)  # Get the index of the max log-probability
+            total += targets.size(0)
+            correct += (predicted == targets).sum().item()
+
+    # Calculate average test loss and accuracy
+    avg_test_loss = test_loss / total
+    accuracy = correct / total * 100  # As a percentage
+
+    return avg_test_loss, accuracy
+
+
+def test():
+    # load test set
+    combined_test_datasets = []
+    for view in test_views:
+        test_datasets = []
+        test_data_folders = []
+
+        for background in test_backgrounds:
+            for res in test_res:
+                test_data_folder = '_'.join([background, view, res])
+                test_data_folders.append(test_data_folder)
+
+        for test_data_folder in test_data_folders:
+            if view == 'cr':
+                test_dataset = prepare_test_data(data_folder=test_data_folder, if_split=False)
+            else:
+                test_dataset = prepare_test_data(data_folder=test_data_folder, if_split=True)
+            test_datasets.append(test_dataset)
+
+        combined_test_dataset = ConcatDataset(test_datasets)
+        combined_test_datasets.append(combined_test_dataset)
+
+    for view in to_test_views:
+        for res in to_test_res:
+            for background in to_test_backgrounds:
+                # find model folder and load result
+                model_name = '_'.join([background, view, res])
+                model_folder = os.path.join(model_dir, model_name)
+                result_path = os.path.join(log_dir, model_name, '_'.join([backbone, 'log', 'data.pkl']))
+
+                # validation results and test results are stored together
+                with open(result_path, 'rb') as f:
+                    result = pickle.load(f)
+                train_losses = result['tl']
+                train_accs = result['ta']
+                val_losses = result['vl']
+                val_accs = result['va']
+
+                # vessel for test results
+                new_val_losses = []
+                new_val_accs = []
+                for i in range(len(combined_test_datasets)):
+                    new_val_losses.append([])
+                    new_val_accs.append([])
+
+                # load the model backbone
+                model, _ = get_model(backbone, pretrained=False, num_classes=num_classes)
+                model.to(device)
+
+                for epoch in range(max_epoch + 1):
+                    model_path = os.path.join(model_folder, '_'.join([backbone, 'epoch', str(epoch) + '.pth']))
+                    state_dict = torch.load(model_path, map_location=torch.device(device))
+                    model.load_state_dict(state_dict)
+                    model.eval()
+
+                    # evaluate the model
+                    for i, test_dataset in enumerate(combined_test_datasets):
+                        test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size,
+                                                                      shuffle=False)
+                        loss, accuracy = test_model(model, test_dataloader)
+                        new_val_losses[i].append(loss)
+                        new_val_accs[i].append(accuracy)
+
+                # write the result
+                original_len = len(val_losses)
+                for i in range(0, len(new_val_losses)):
+                    val_losses[i + original_len] = new_val_losses[i]
+                    val_accs[i + original_len] = new_val_accs[i]
+
+                with open(result_path, 'wb') as f:
+                    pickle.dump({'tl': train_losses,
+                                 'vl': val_losses,
+                                 'ta': train_accs,
+                                 'va': val_accs}, f)
+
+
+if __name__ == '__main__':
+    test()
+    print('Done')
+    

@@ -1,21 +1,40 @@
 data:
-  root: ../data/
-  batch_size: 32
-  num_classes: 32
-  view:
-    - fx
-  res:
-    - f
-  background:
-    - meadow
+  train:
+    batch_size: 32
+    num_classes: 32
+    view:
+      - er
+    res:
+      - f
+    background:
+      - meadow
+      - forest
+      - desert
+      - industrial
+  validation:
+    batch_size: 32
+    num_classes: 32
+    view:
+      - er
+      - f
+      - r
+      - fx
+      - cr
+    res:
+      - f
+    background:
+      - meadow
+      - forest
+      - desert
+      - industrial
+
+
 
 model:
-  model_name: resnet18
+  backbone: resnet18
   pretrained: false
-
-training:
-  epochs: 30
-  check_point: 30
+  epochs: 100
+  checkpoint: 2
 
 optimizer:
   optimizer_name: SGD

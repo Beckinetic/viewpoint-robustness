@@ -3,8 +3,8 @@ import os
 
 import yaml
 
-from data.sample_dataset import sample_dataset_by_instance, sample_dataset_by_category
-from data.create_dataset import create_labels
+from src.data.sample_dataset import sample_dataset_by_instance, sample_dataset_by_category
+from src.data.create_dataset import create_labels
 
 
 def parse_args():

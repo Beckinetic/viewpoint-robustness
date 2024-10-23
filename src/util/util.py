@@ -1,5 +1,14 @@
+import argparse
 import glob
 import json
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('config', type=str)
+    parser.add_argument('--log-dir', type=str, default='logs/')
+    parser.add_argument('--plot-dir', type=str, default='plots/')
+    return parser.parse_args()
 
 
 def merge_log_files(files):

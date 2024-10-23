@@ -14,7 +14,7 @@ import requests
 from torchvision import transforms, models
 from torchvision.models.vgg import VGG19_Weights
 
-from model.models import get_device
+from src.model.models import get_device
 
 # define device
 device = get_device()

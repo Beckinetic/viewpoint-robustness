@@ -1,7 +1,9 @@
 #!/bin/bash
 
-CONFIG_PATH="../configs/sample_dataset.yaml"
-DATASET_PATH="../data"
+cd ..
+
+CONFIG_PATH="configs/sample_dataset.yaml"
+DATASET_PATH="data"
 
 usage() {
     echo "Usage: $0 [-c <config_path>] [-d <dataset>]"
@@ -19,4 +21,4 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-python ../src/sample_dataset.py "$CONFIG_PATH" --dataset "$DATASET_PATH"
+python -m src.sample_dataset "$CONFIG_PATH" --dataset "$DATASET_PATH"

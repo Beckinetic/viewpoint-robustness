@@ -3,22 +3,34 @@ log:
     - f
     - r
     - fx
-  res:
-    - combined
+    - er
   background:
-#    - meadow
-#    - forest
-#    - industrial
-#    - desert
     - combined
+  res: combined
 
 model:
   model_name: resnet18
+  max_epoch: 30
 
 plot:
   loss_min: 0
-  loss_max: 5
+  loss_max: 7.05
   acc_min: 0
-  acc_max: 100
+  acc_max: 105
+  loss_change_min: -1
+  loss_change_max: 5
+  acc_change_min: -80
+  acc_change_max: 5
+  palette:
+    f : "#FF1F5B"
+    r: "#00CD6C"
+    fx: "#009ADE"
+    er: "#AF58BA"
+  view:
+    - "Full view"
+    - "Restricted view"
+    - "Fixed view"
+    - "Extra restricted view"
+
 
 

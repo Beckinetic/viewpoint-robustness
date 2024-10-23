@@ -1,5 +1,4 @@
 import argparse
-import glob
 import logging
 import os
 import pickle
@@ -8,7 +7,6 @@ import sys
 import torch
 import yaml
 from torchvision import transforms
-from tqdm import tqdm
 
 from model.models import get_model, get_device
 from texture_shape_bias.texture_bias_evaluation import get_cue_conflict_images, CueConflictDataset, get_content_images, \
@@ -73,11 +71,6 @@ def main():
         shape_decisions = []
         texture_decisions = []
         total_decisions = []
-
-        # deprecated
-        # epochs = len(glob.glob(os.path.join(model_path, '*.pth')))
-        # for epoch in tqdm(range(epochs), desc="Evaluating Models Through Epochs"):
-        #     logging.info(f"Evaluating Model {model_path} Epoch {epoch}")
 
         # load the state dict of the last epoch
         last_epoch = config['training']['last_epoch']

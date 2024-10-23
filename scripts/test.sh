@@ -4,7 +4,7 @@
 # shellcheck disable=SC2164
 cd ..
 
-CONFIG_PATH="configs/train.yaml" # configurations for loss and accuracy plotting
+CONFIG_PATH="configs/test.yaml" # configurations for loss and accuracy plotting
 DATA_DIR="data"
 LOG_DIR="logs"
 MODEL_DIR="models"
@@ -13,4 +13,4 @@ PLOT_DIR="plots"
 mkdir -p "$LOG_DIR"
 mkdir -p "$PLOT_DIR"
 
-python -m src.train "$CONFIG_PATH" --data-dir "$DATA_DIR" --log-dir "$LOG_DIR" --model-dir "$MODEL_DIR"
+python -m src.test "$CONFIG_PATH" --data-dir "$DATA_DIR" --log-dir "$LOG_DIR" --model-dir "$MODEL_DIR"
