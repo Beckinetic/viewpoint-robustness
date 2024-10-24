@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader, ConcatDataset
 from torchvision.transforms import transforms
 from tqdm import tqdm
 
-from src.data.create_dataset import create_dataset, train_val_test_split
+from src.data.create_dataset import create_dataset, train_val_split
 from src.model.models import get_model, get_optimizer, get_criterion, get_scheduler, get_device
 
 logging.basicConfig(level=logging.INFO)
@@ -70,7 +70,7 @@ def prepare_data(data_folder):
     ])
     dataset = create_dataset(data_path, label_path=None, transform=transform)
 
-    train_dataset, val_dataset = train_val_test_split(dataset)
+    train_dataset, val_dataset = train_val_split(dataset)
     print(f'Train dataset size: {len(train_dataset)}')
     print(f'Val dataset size: {len(val_dataset)}')
     return train_dataset, val_dataset
@@ -79,10 +79,10 @@ def prepare_data(data_folder):
 def train(data_folder, train_dataset, val_datasets):
     # prepare data
     train_dataloader = DataLoader(train_dataset, batch_size=train_batch_size, shuffle=True)
-    val_dataloaders = []
-    for val_dataset in val_datasets:
-        val_dataloader = DataLoader(val_dataset, batch_size=val_batch_size, shuffle=True)
-        val_dataloaders.append(val_dataloader)
+    val_dataloaders = {}
+    for val_ind, key in val_datasets:
+        val_dataloader = DataLoader(val_datasets[key], batch_size=val_batch_size, shuffle=True)
+        val_dataloaders[key] = val_dataloader
     logging.info(f'Train dataset size: {len(train_dataset)}')
     logging.info(f'Val dataset number: {len(val_datasets)}')
 
@@ -116,9 +116,9 @@ def train(data_folder, train_dataset, val_datasets):
     train_accs = []
     val_losses = {}
     val_accs = {}
-    for val_ind, val_dataset in enumerate(val_datasets):
-        val_losses[val_ind] = []
-        val_accs[val_ind] = []
+    for val_ind, key in enumerate(val_datasets):
+        val_losses[key] = []
+        val_accs[key] = []
 
     for epoch in tqdm(range(epochs), desc=f'Training {backbone} on {data_folder}'):
         # train the model
@@ -145,7 +145,8 @@ def train(data_folder, train_dataset, val_datasets):
 
         # validate model
         model.eval()
-        for val_ind, val_dataloader in enumerate(val_dataloaders):
+        for val_ind, key in enumerate(val_dataloaders):
+            val_dataloader = val_dataloaders[key]
             val_loss = 0.0
             val_correct = 0
             total_val = 0
@@ -160,8 +161,8 @@ def train(data_folder, train_dataset, val_datasets):
                     total_val += labels.size(0)
                     val_correct += (predicted == labels).sum().item()
 
-            val_losses[val_ind].append(val_loss / len(val_dataloader.dataset))
-            val_accs[val_ind].append(100 * val_correct / total_val)
+            val_losses[key].append(val_loss / len(val_dataloader.dataset))
+            val_accs[key].append(100 * val_correct / total_val)
 
         # run scheduler
         scheduler.step()
@@ -190,13 +191,13 @@ def train(data_folder, train_dataset, val_datasets):
         'va': val_accs
     }
     log_data_dict_path = f"{log_dir}/{data_folder}/{backbone}_log_data.pkl"
-    with open(log_data_dict_path, 'wb') as file:
-        pickle.dump(log_data_dict, file)
+    with open(log_data_dict_path, 'wb') as f:
+        pickle.dump(log_data_dict, f)
 
 
 def main():
     # combine the same datasets of the same view
-    combined_train_datasets = []
+    combined_train_datasets = {}
     for view in train_views:
         train_datasets = []
         train_data_folders = []
@@ -211,9 +212,9 @@ def main():
             train_datasets.append(train_dataset)
 
         combined_train_dataset = ConcatDataset(train_datasets)
-        combined_train_datasets.append(combined_train_dataset)
+        combined_train_datasets[view] = combined_train_dataset
 
-    combined_val_datasets = []
+    combined_val_datasets = {}
     for view in val_views:
         val_datasets = []
         val_data_folders = []
@@ -228,15 +229,15 @@ def main():
             val_datasets.append(val_dataset)
 
         combined_val_dataset = ConcatDataset(val_datasets)
-        combined_val_datasets.append(combined_val_dataset)
+        combined_val_datasets[view] = combined_val_dataset
 
     for ind_view, view in enumerate(train_views):
         data_folder = '_'.join(['combined', view, 'combined'])
-        combined_train_dataset = combined_train_datasets[ind_view]
+        combined_train_dataset = combined_train_datasets[view]
         print(f'Combined dataset name: {data_folder}')
         print(f'Combined train dataset size: {len(combined_train_dataset)}')
-        for val_ind, combined_val_dataset in enumerate(combined_val_datasets):
-            print(f'Combined validation dataset {val_ind} size: {len(combined_val_dataset)}')
+        for val_ind, key in enumerate(combined_val_datasets):
+            print(f'Combined validation dataset {val_ind} size: {len(combined_val_datasets[key])}')
 
         train(data_folder, combined_train_dataset, combined_val_datasets)
 

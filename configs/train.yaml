@@ -3,7 +3,10 @@ data:
     batch_size: 32
     num_classes: 32
     view:
+      - f
+      - r
       - er
+      - fx
     res:
       - f
     background:
@@ -15,11 +18,10 @@ data:
     batch_size: 32
     num_classes: 32
     view:
-      - er
       - f
       - r
       - fx
-      - cr
+      - er
     res:
       - f
     background:

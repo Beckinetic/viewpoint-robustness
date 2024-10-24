@@ -11,11 +11,6 @@ from sklearn.model_selection import train_test_split
 
 
 def create_labels(root_dir):
-    """
-    Creates labels file
-    :param root_dir: root directory of dataset
-    :return: labels path
-    """
     image_paths = glob.glob(os.path.join(root_dir, '*.png'))
     with open('objaverse/parsed_lvis_annotations.json') as f:
         annotations = json.load(f)
@@ -58,13 +53,6 @@ class CustomDataset(Dataset):
 
 
 def create_dataset(root_dir, label_path=None, transform=None):
-    """
-    Create dataset for training and validation sets.
-    :param root_dir: root directory of images and labels files
-    :param label_path: labels file path
-    :param transform: transform function
-    :return:
-    """
     image_paths = glob.glob(os.path.join(root_dir, '*.png'))
 
     if label_path is None:
@@ -79,7 +67,7 @@ def create_dataset(root_dir, label_path=None, transform=None):
     return dataset
 
 
-def train_val_test_split(dataset, test_size=0.2, random_state=42):
+def train_val_split(dataset, test_size=0.2, random_state=42):
     image_paths = dataset.image_paths
     labels = dataset.labels
     label_list = [labels[img_path] for img_path in image_paths]
@@ -97,12 +85,8 @@ def train_val_test_split(dataset, test_size=0.2, random_state=42):
     return train_dataset, val_dataset
 
 
+# DEPRECATED: for background mixing
 def extract_indices(dataset):
-    """
-    Extracts indices and labels from the ConcatDataset or Subset.
-    :param dataset: The dataset (either ConcatDataset or Subset)
-    :return: A list of tuples containing the index in the original dataset and the corresponding label
-    """
     indices_labels = []
     if isinstance(dataset, ConcatDataset):
         for ds_index, ds in enumerate(dataset.datasets):
@@ -123,13 +107,6 @@ def extract_indices(dataset):
 
 
 def train_test_split_mixed_dataset(mixed_dataset, test_size=0.2, random_state=42):
-    """
-    Splits the mixed dataset into training and testing sets.
-    :param mixed_dataset: The mixed dataset (ConcatDataset)
-    :param test_size: The proportion of the dataset to include in the test split
-    :param random_state: The seed used by the random number generator
-    :return: Two Subsets (train_dataset, test_dataset)
-    """
     indices_labels = extract_indices(mixed_dataset)
     indices, labels = zip(*[(idx, label) for _, idx, label in indices_labels])
 

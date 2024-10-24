@@ -3,7 +3,6 @@ data:
     batch_size: 32
     num_classes: 32
     view:
-      - er
       - cr
     res:
       - f

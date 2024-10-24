@@ -11,7 +11,6 @@ import torch
 import yaml
 from tqdm import tqdm
 
-warnings.filterwarnings('ignore')
 from torchvision import models
 import numpy as np
 import cv2
@@ -29,6 +28,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from src.model.models import get_model, get_device
 from src.data.create_dataset import create_labels
 
+warnings.filterwarnings('ignore')
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 

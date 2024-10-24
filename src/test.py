@@ -9,7 +9,7 @@ from torch.utils.data import ConcatDataset
 from torchvision import transforms
 from tqdm import tqdm
 
-from src.data.create_dataset import create_dataset, train_val_test_split
+from src.data.create_dataset import create_dataset, train_val_split
 from src.model.models import get_model, get_device
 
 logging.basicConfig(level=logging.INFO)
@@ -55,7 +55,7 @@ def prepare_test_data(data_folder, if_split=True):
     dataset = create_dataset(data_path, label_path=None, transform=transform)
 
     if if_split:
-        train_dataset, val_dataset = train_val_test_split(dataset)
+        train_dataset, val_dataset = train_val_split(dataset)
         return val_dataset
     else:
         return dataset
@@ -86,7 +86,7 @@ def test_model(model, test_dataloader):
 
 def test():
     # load test set
-    combined_test_datasets = []
+    combined_test_datasets = {}
     for view in test_views:
         test_datasets = []
         test_data_folders = []
@@ -104,7 +104,7 @@ def test():
             test_datasets.append(test_dataset)
 
         combined_test_dataset = ConcatDataset(test_datasets)
-        combined_test_datasets.append(combined_test_dataset)
+        combined_test_datasets[view] = combined_test_dataset
 
     for view in to_test_views:
         for res in to_test_res:
@@ -112,22 +112,11 @@ def test():
                 # find model folder and load result
                 model_name = '_'.join([background, view, res])
                 model_folder = os.path.join(model_dir, model_name)
-                result_path = os.path.join(log_dir, model_name, '_'.join([backbone, 'log', 'data.pkl']))
+                result_path = os.path.join(log_dir, model_name, '_'.join([backbone, 'test', 'data.pkl']))
 
                 # validation results and test results are stored together
-                with open(result_path, 'rb') as f:
-                    result = pickle.load(f)
-                train_losses = result['tl']
-                train_accs = result['ta']
-                val_losses = result['vl']
-                val_accs = result['va']
-
-                # vessel for test results
-                new_val_losses = []
-                new_val_accs = []
-                for i in range(len(combined_test_datasets)):
-                    new_val_losses.append([])
-                    new_val_accs.append([])
+                test_losses = {}
+                test_accs = {}
 
                 # load the model backbone
                 model, _ = get_model(backbone, pretrained=False, num_classes=num_classes)
@@ -140,24 +129,17 @@ def test():
                     model.eval()
 
                     # evaluate the model
-                    for i, test_dataset in enumerate(combined_test_datasets):
+                    for ind_test, key in enumerate(combined_test_datasets):
+                        test_dataset = combined_test_datasets[key]
                         test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size,
                                                                       shuffle=False)
                         loss, accuracy = test_model(model, test_dataloader)
-                        new_val_losses[i].append(loss)
-                        new_val_accs[i].append(accuracy)
+                        test_losses[key].append(loss)
+                        test_accs[key].append(accuracy)
 
                 # write the result
-                original_len = len(val_losses)
-                for i in range(0, len(new_val_losses)):
-                    val_losses[i + original_len] = new_val_losses[i]
-                    val_accs[i + original_len] = new_val_accs[i]
-
                 with open(result_path, 'wb') as f:
-                    pickle.dump({'tl': train_losses,
-                                 'vl': val_losses,
-                                 'ta': train_accs,
-                                 'va': val_accs}, f)
+                    pickle.dump({'tel': test_losses, 'tea': test_accs}, f)
 
 
 if __name__ == '__main__':
