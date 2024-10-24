@@ -28,8 +28,6 @@ data:
       - desert
       - industrial
 
-
-
 model:
   backbone: resnet18
   pretrained: false
