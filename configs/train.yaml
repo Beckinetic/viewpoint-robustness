@@ -33,8 +33,8 @@ data:
 model:
   backbone: resnet18
   pretrained: false
-  epochs: 100
-  checkpoint: 2
+  epochs: 30
+  checkpoint: 1
 
 optimizer:
   optimizer_name: SGD
