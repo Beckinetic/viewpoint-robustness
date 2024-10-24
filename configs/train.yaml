@@ -4,17 +4,16 @@ data:
     num_classes: 32
     view:
       - f
-#      - r
-#      - er
-#      - fx
+      - r
+      - er
+      - fx
     res:
       - f
     background:
-      - sample
-#      - meadow
-#      - forest
-#      - desert
-#      - industrial
+      - meadow
+      - forest
+      - desert
+      - industrial
   validation:
     batch_size: 32
     num_classes: 32
