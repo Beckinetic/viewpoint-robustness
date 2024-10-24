@@ -179,9 +179,9 @@ def train(data_folder, train_dataset, val_datasets):
         with open(log_path, 'w') as log_file:
             log_file.write(f"Epoch {epoch + 1}, Train Loss: {train_loss}\n")
             log_file.write(f"Epoch {epoch + 1}, Train Accuracy: {100 * train_correct / total}\n")
-            for val_ind, val_dataloader in enumerate(val_dataloaders):
-                log_file.write(f"Epoch {epoch + 1}, Validation {val_ind} Loss: {val_losses[val_ind][epoch]}\n")
-                log_file.write(f"Epoch {epoch + 1}, Validation {val_ind} Accuracy: {val_accs[val_ind][epoch]}\n")
+            for val_ind, key in enumerate(val_dataloaders):
+                log_file.write(f"Epoch {epoch + 1}, Validation {val_ind} Loss: {val_losses[key][epoch]}\n")
+                log_file.write(f"Epoch {epoch + 1}, Validation {val_ind} Accuracy: {val_accs[key][epoch]}\n")
 
     # save congregated loss and acc data
     log_data_dict = {
