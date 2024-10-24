@@ -80,7 +80,7 @@ def train(data_folder, train_dataset, val_datasets):
     # prepare data
     train_dataloader = DataLoader(train_dataset, batch_size=train_batch_size, shuffle=True)
     val_dataloaders = {}
-    for val_ind, key in val_datasets:
+    for val_ind, key in enumerate(val_datasets):
         val_dataloader = DataLoader(val_datasets[key], batch_size=val_batch_size, shuffle=True)
         val_dataloaders[key] = val_dataloader
     logging.info(f'Train dataset size: {len(train_dataset)}')
