@@ -4,7 +4,7 @@
 # shellcheck disable=SC2164
 cd ..
 
-CONFIG_PATH="configs/class_bias_eval.yaml" # configurations for loss and accuracy plotting
+CONFIG_PATH="configs/classic_bias_eval.yaml" # configurations for loss and accuracy plotting
 DATA_DIR="data"
 LOG_DIR="logs"
 MODEL_DIR="models"
