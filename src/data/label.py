@@ -17,7 +17,7 @@ root = args.data_dir
 data_folders = config['data_folders']
 
 
-def main():
+def relabel():
     for data_folder in data_folders:
         data_path = os.path.join(root, data_folder)
         create_labels(data_path)
@@ -25,4 +25,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    relabel()
