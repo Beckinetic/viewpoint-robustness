@@ -62,12 +62,12 @@ def main():
             for eval_view in eval_views:
                 for suffix in suffixes:
                     if suffix:
-                        cue_conflict_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view, suffix]),
+                        cue_conflict_data_path = os.path.join(data_dir, '_'.join(['cue_conflict', eval_view, suffix]),
                                                               'output')
                     else:
-                        cue_conflict_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view]),
+                        cue_conflict_data_path = os.path.join(data_dir, '_'.join(['cue_conflict', eval_view]),
                                                               'output')
-                    content_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view]), 'content')
+                    content_data_path = os.path.join(data_dir, '_'.join(['cue_conflict', eval_view]), 'content')
 
                     # prepare cue-conflict dataset
                     transform = transforms.Compose([
