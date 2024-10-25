@@ -68,7 +68,7 @@ def test_model(model, test_dataloader):
     test_loss = 0.0
 
     with torch.no_grad():  # No need to track gradients during testing
-        for data, targets in tqdm(test_dataloader):
+        for data, targets in test_dataloader:
             data, targets = data.to(device), targets.to(device)
             outputs = model(data)
             loss = torch.nn.functional.cross_entropy(outputs, targets)
@@ -122,7 +122,7 @@ def test():
                 model, _ = get_model(backbone, pretrained=False, num_classes=num_classes)
                 model.to(device)
 
-                for epoch in range(max_epoch + 1):
+                for epoch in tqdm(range(max_epoch + 1), desc=f'Epoch {epoch}, Model {view}'):
                     model_path = os.path.join(model_folder, '_'.join([backbone, 'epoch', str(epoch) + '.pth']))
                     state_dict = torch.load(model_path, map_location=torch.device(device))
                     model.load_state_dict(state_dict)
