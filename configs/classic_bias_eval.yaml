@@ -8,8 +8,6 @@ data:
       - er
       - cr
     suffix:
-      - no_obj
-      - no_bg
 
 model:
   backbone: resnet18
