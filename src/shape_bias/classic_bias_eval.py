@@ -85,7 +85,7 @@ def main():
 
                 logging.info(f"Evaluating on content dataset")
                 content_accuracy = test_model(model, content_dataloader)
-                logging.info(f"Evaluating on cue-conflict dataset")
+                logging.info(f"Evaluating on cue-conflict {eval_view} dataset")
                 shape_decision, texture_decision, total_decision = evaluate_model_shape_bias(model,
                                                                                              cue_conflict_dataloader,
                                                                                              device)
