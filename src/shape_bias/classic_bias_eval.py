@@ -11,7 +11,7 @@ from torchvision import transforms
 from src.data.create_dataset import CustomDataset
 from src.model.models import get_model, get_device
 from src.shape_bias.shape_bias_eval import get_cue_conflict_images, CueConflictDataset, get_content_images, evaluate_model_shape_bias
-from src.test import test_model
+from src.model.test import test_model
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 device = get_device()
