@@ -31,6 +31,7 @@ with open(args.config, 'r') as file:
 batch_size = config['data']['test']['batch_size']
 num_classes = config['data']['test']['num_classes']
 test_views = config['data']['test']['view']
+no_split = config['data']['test']['no_split']
 test_res = config['data']['test']['res']
 test_backgrounds = config['data']['test']['background']
 
@@ -97,7 +98,7 @@ def test():
                 test_data_folders.append(test_data_folder)
 
         for test_data_folder in test_data_folders:
-            if view == 'cr':
+            if view in no_split:
                 test_dataset = prepare_test_data(data_folder=test_data_folder, if_split=False)
             else:
                 test_dataset = prepare_test_data(data_folder=test_data_folder, if_split=True)

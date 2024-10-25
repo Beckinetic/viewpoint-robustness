@@ -4,6 +4,9 @@ data:
     num_classes: 32
     view:
       - cr
+    no_split:
+      - cr
+      - cr_no_obj
     res:
       - f
     background:

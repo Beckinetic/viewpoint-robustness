@@ -16,7 +16,6 @@ from torchvision.models.vgg import VGG19_Weights
 
 from src.model.models import get_device
 
-# define device
 device = get_device()
 
 # freeze all VGG parameters since we're only optimizing the target image

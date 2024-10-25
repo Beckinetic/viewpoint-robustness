@@ -2,8 +2,10 @@ log:
   view:
     - f
     - r
-    - fx
     - er
+    - fx
+  test_view:
+    - cr
   background:
     - combined
   res: combined
@@ -24,13 +26,13 @@ plot:
   palette:
     f : "#FF1F5B"
     r: "#00CD6C"
-    fx: "#009ADE"
     er: "#AF58BA"
+    fx: "#009ADE"
   view:
     - "Full view"
     - "Restricted view"
-    - "Fixed view"
     - "Extra restricted view"
+    - "Fixed view"
 
 
 

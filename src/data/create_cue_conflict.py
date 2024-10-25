@@ -6,7 +6,7 @@ import sys
 import yaml
 from tqdm import tqdm
 
-from src.texture_shape_bias.style_transfer import read_json_file, divide_labels, find_filenames_by_label, load_image, \
+from src.shape_bias.style_transfer import read_json_file, divide_labels, find_filenames_by_label, load_image, \
     style_transfer
 from src.model.models import get_device
 

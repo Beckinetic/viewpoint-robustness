@@ -1,43 +1,25 @@
 data:
-  root: ../data/cue_conflict_fx
-  pasted: false
+  eval:
+    num_classes: 32
+    view:
+      - f
+      - r
+      - fx
+      - er
+      - cr
+    suffix:
+      - no_obj
+      - no_bg
 
 model:
-  model_folders:
-#    - mixed_f_f_0.1
-#    - mixed_f_f_0.25
-#    - mixed_f_f_0.3
-#    - mixed_f_f_0.5
-#    - mixed_f_f_0.7
-#    - mixed_f_f_0.9
-#    - mixed_r_f_0.1
-#    - mixed_r_f_0.25
-#    - mixed_r_f_0.3
-#    - mixed_r_f_0.5
-#    - mixed_r_f_0.7
-#    - mixed_r_f_0.9
-#    - mixed_fx_f_0.1
-#    - mixed_fx_f_0.25
-#    - mixed_fx_f_0.3
-#    - mixed_fx_f_0.5
-#    - mixed_fx_f_0.7
-#    - mixed_fx_f_0.9
-    - combined_f_combined
-    - combined_fx_combined
-    - combined_r_combined
-#    - meadow_f_f
-#    - forest_f_f
-#    - industrial_f_f
-#    - desert_f_f
-#    - meadow_r_f
-#    - forest_r_f
-#    - industrial_r_f
-#    - desert_r_f
-#    - meadow_fx_f
-#    - forest_fx_f
-#    - industrial_fx_f
-#    - desert_fx_f
-  model_name: resnet18
-
-training:
-  last_epoch: 30
+  backbone: resnet18
+  to_eval:
+    view:
+      - f
+      - r
+      - fx
+    res:
+      - combined
+    background:
+      - combined
+    max_epoch: 30
