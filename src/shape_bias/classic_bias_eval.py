@@ -61,7 +61,8 @@ def main():
             # get cue-conflict dataset
             for eval_view in eval_views:
                 for suffix in suffixes:
-                    cue_conflict_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view, suffix]), 'output')
+                    cue_conflict_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view, suffix]),
+                                                          'output')
                     content_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view]), 'content')
 
                     # prepare cue-conflict dataset
