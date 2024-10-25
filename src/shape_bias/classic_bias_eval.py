@@ -61,8 +61,12 @@ def main():
             # get cue-conflict dataset
             for eval_view in eval_views:
                 for suffix in suffixes:
-                    cue_conflict_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view, suffix]),
-                                                          'output')
+                    if suffix:
+                        cue_conflict_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view, suffix]),
+                                                              'output')
+                    else:
+                        cue_conflict_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view]),
+                                                              'output')
                     content_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view]), 'content')
 
                     # prepare cue-conflict dataset
@@ -92,8 +96,10 @@ def main():
                     shape_decision, texture_decision, total_decision = evaluate_model_shape_bias(model,
                                                                                                  cue_conflict_dataloader,
                                                                                                  device)
-
-                    key = '_'.join([eval_view, suffix])
+                    if suffix:
+                        key = '_'.join([eval_view, suffix])
+                    else:
+                        key = eval_view
                     content_accuracies[key] = content_accuracy
                     shape_decisions[key] = shape_decision
                     texture_decisions[key] = texture_decision

@@ -110,7 +110,10 @@ def plot_shape_bias(suffix):
             result_path = os.path.join(log_dir, log_folder, result_file_name)
             with open(result_path, 'rb') as file:
                 results = pickle.load(file)
-            key = '_'.join([view, suffix])
+            if suffix:
+                key = '_'.join([view, suffix])
+            else:
+                key = view
             content_accuracy = results['content_accuracies'][key]
             shape_decisions = results['shape_decisions'][key]
             texture_decisions = results['texture_decisions'][key]
@@ -177,7 +180,10 @@ def plot_shape_bias(suffix):
             texture_decisions_merged = {label: 0 for label in category_labels.keys()}
             all_decisions_merged = {label: 0 for label in category_labels.keys()}
             for other_view in other_views:
-                key = '_'.join([other_view, suffix])
+                if suffix:
+                    key = '_'.join([other_view, suffix])
+                else:
+                    key = other_view
                 content_accuracy = results['content_accuracies'][key]
                 shape_decisions = results['shape_decisions'][key]
                 texture_decisions = results['texture_decisions'][key]
@@ -248,7 +254,10 @@ def plot_shape_bias(suffix):
             result_path = os.path.join(log_dir, log_folder, result_file_name)
             with open(result_path, 'rb') as file:
                 results = pickle.load(file)
-            key = '_'.join([ood_view, suffix])
+            if suffix:
+                key = '_'.join([ood_view, suffix])
+            else:
+                key = ood_view
             content_accuracy = results['content_accuracies'][key]
             shape_decisions = results['shape_decisions'][key]
             texture_decisions = results['texture_decisions'][key]
