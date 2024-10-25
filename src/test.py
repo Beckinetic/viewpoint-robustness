@@ -122,7 +122,7 @@ def test():
                 model, _ = get_model(backbone, pretrained=False, num_classes=num_classes)
                 model.to(device)
 
-                for epoch in tqdm(range(max_epoch + 1), desc=f'Epoch {epoch}, Model {view}'):
+                for epoch in tqdm(range(max_epoch + 1), desc=f'Model {view}'):
                     model_path = os.path.join(model_folder, '_'.join([backbone, 'epoch', str(epoch) + '.pth']))
                     state_dict = torch.load(model_path, map_location=torch.device(device))
                     model.load_state_dict(state_dict)
