@@ -32,8 +32,9 @@ with open(args.config, 'r') as file:
 
 num_classes = config['data']['eval']['num_classes']
 eval_views = config['data']['eval']['view']
+suffixes = ['']
 if config['data']['eval']['suffix'] is not None:
-    suffix = config['data']['eval']['suffix']
+    suffixes.extend(config['data']['eval']['suffix'])
 backbone = config['model']['backbone']
 views = config['model']['to_eval']['view']
 res = config['model']['to_eval']['res']
@@ -59,41 +60,43 @@ def main():
 
             # get cue-conflict dataset
             for eval_view in eval_views:
-                cue_conflict_data_path = os.path.join(data_dir, '_'.join(['cue_conflict', eval_view]), 'output')
-                content_data_path = os.path.join(data_dir, '_'.join(['cue_conflict', eval_view]), 'content')
+                for suffix in suffixes:
+                    cue_conflict_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view, suffix]), 'output')
+                    content_data_path = os.path.join(data_dir, '_'.join(['eval_views', eval_view]), 'content')
 
-                # prepare cue-conflict dataset
-                transform = transforms.Compose([
-                    transforms.Resize((224, 224)),
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                ])
-                img_paths, shape_labels, texture_labels = get_cue_conflict_images(cue_conflict_data_path)
-                cue_conflict_dataset = CueConflictDataset(img_paths, shape_labels, texture_labels, transform)
-                cue_conflict_dataloader = torch.utils.data.DataLoader(cue_conflict_dataset, batch_size=1, shuffle=True)
+                    # prepare cue-conflict dataset
+                    transform = transforms.Compose([
+                        transforms.Resize((224, 224)),
+                        transforms.ToTensor(),
+                        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                    ])
+                    img_paths, shape_labels, texture_labels = get_cue_conflict_images(cue_conflict_data_path)
+                    cue_conflict_dataset = CueConflictDataset(img_paths, shape_labels, texture_labels, transform)
+                    cue_conflict_dataloader = torch.utils.data.DataLoader(cue_conflict_dataset, batch_size=1, shuffle=True)
 
-                # prepare content dataset
-                img_paths, labels = get_content_images(content_data_path)
-                content_dataset = CustomDataset(img_paths, labels, transform)
-                content_dataloader = torch.utils.data.DataLoader(content_dataset, batch_size=1, shuffle=True)
+                    # prepare content dataset
+                    img_paths, labels = get_content_images(content_data_path)
+                    content_dataset = CustomDataset(img_paths, labels, transform)
+                    content_dataloader = torch.utils.data.DataLoader(content_dataset, batch_size=1, shuffle=True)
 
-                # load the state dict of the last epoch
-                state_dict = torch.load(model_path, map_location=torch.device(device))
-                model.load_state_dict(state_dict)
-                model.to(device)
-                model.eval()
+                    # load the state dict of the last epoch
+                    state_dict = torch.load(model_path, map_location=torch.device(device))
+                    model.load_state_dict(state_dict)
+                    model.to(device)
+                    model.eval()
 
-                logging.info(f"Evaluating on content dataset")
-                content_accuracy = test_model(model, content_dataloader)
-                logging.info(f"Evaluating on cue-conflict {eval_view} dataset")
-                shape_decision, texture_decision, total_decision = evaluate_model_shape_bias(model,
-                                                                                             cue_conflict_dataloader,
-                                                                                             device)
+                    logging.info(f"Evaluating on content dataset")
+                    content_accuracy = test_model(model, content_dataloader)
+                    logging.info(f"Evaluating on cue-conflict {eval_view} dataset")
+                    shape_decision, texture_decision, total_decision = evaluate_model_shape_bias(model,
+                                                                                                 cue_conflict_dataloader,
+                                                                                                 device)
 
-                content_accuracies[eval_view] = content_accuracy
-                shape_decisions[eval_view] = shape_decision
-                texture_decisions[eval_view] = texture_decision
-                total_decisions[eval_view] = total_decision
+                    key = '_'.join([eval_view, suffix])
+                    content_accuracies[key] = content_accuracy
+                    shape_decisions[key] = shape_decision
+                    texture_decisions[key] = texture_decision
+                    total_decisions[key] = total_decision
 
             # save results
             result = {'content_accuracies': content_accuracies,

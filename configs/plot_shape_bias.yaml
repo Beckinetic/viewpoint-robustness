@@ -3,11 +3,20 @@ log:
     - f
     - r
     - fx
+    - er
+    - fx
   background:
     - combined
   res: combined
-  cue_conflict: cue_conflict_f
-  pasted: false
+  eval:
+    view:
+      - f
+      - r
+      - er
+      - fx
+      - cr
+    ood_view: cr
+    suffix:
 
 model:
   model_name: resnet18

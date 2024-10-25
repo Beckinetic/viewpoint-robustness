@@ -15,9 +15,10 @@ model:
   backbone: resnet18
   to_eval:
     view:
-      - f
-      - r
-      - fx
+#      - f
+#      - r
+      - er
+#      - fx
     res: combined
     background:
       - combined
