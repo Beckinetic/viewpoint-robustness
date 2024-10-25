@@ -18,8 +18,7 @@ model:
       - f
       - r
       - fx
-    res:
-      - combined
+    res: combined
     background:
       - combined
     max_epoch: 30
