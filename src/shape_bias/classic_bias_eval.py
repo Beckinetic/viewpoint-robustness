@@ -47,7 +47,7 @@ def main():
             # load model
             model_name = '_'.join([background, view, res])
             model_folder = os.path.join(model_dir, model_name)
-            model_path = os.path.join(model_folder, '_'.join([backbone, 'epoch', max_epoch + '.pth']))
+            model_path = os.path.join(model_folder, '_'.join([backbone, 'epoch', str(max_epoch) + '.pth']))
 
             model, _ = get_model(backbone, pretrained=False, num_classes=num_classes)
 
