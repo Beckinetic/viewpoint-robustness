@@ -117,6 +117,9 @@ def test():
                 # validation results and test results are stored together
                 test_losses = {}
                 test_accs = {}
+                for ind_test, key in enumerate(combined_test_datasets):
+                    test_losses[key] = []
+                    test_accs[key] = []
 
                 # load the model backbone
                 model, _ = get_model(backbone, pretrained=False, num_classes=num_classes)
