@@ -1,19 +1,16 @@
 #!/bin/bash
 
-CONFIG_PATH="../configs/create_distorted.yaml"
+# changing the working directory to the source code directory
+# shellcheck disable=SC2164
+cd ..
 
-usage() {
-    echo "Usage: $0 [-c <config_path>]"
-    echo "  -c, --config       Path to the configuration file (default: configs/create_distorted.yaml)"
-    exit 1
-}
+CONFIG_PATH="configs/create_distorted.yaml" # configurations for loss and accuracy plotting
+DATA_DIR="data"
+LOG_DIR="logs"
+MODEL_DIR="models"
+PLOT_DIR="plots"
 
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        -c|--config) CONFIG_PATH="$2"; shift ;;
-        *) usage ;;
-    esac
-    shift
-done
+mkdir -p "$LOG_DIR"
+mkdir -p "$PLOT_DIR"
 
-python ../src/robustness/create_distorted.py "$CONFIG_PATH"
+python -m src.data.create_distorted "$CONFIG_PATH" --data-dir "$DATA_DIR" --log-dir "$LOG_DIR" --model-dir "$MODEL_DIR"
