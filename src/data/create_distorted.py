@@ -44,7 +44,7 @@ def create_distorted():
 
         for distortion_type in tqdm(distortion_types):
             for severity in severities:
-                output_folder = os.path.join(root, distortion_type, str(severity))
+                output_folder = os.path.join(data_dir, root, distortion_type, str(severity))
                 os.makedirs(output_folder, exist_ok=True)
                 match distortion_type:
                     case 'gaussian_noise':
