@@ -6,7 +6,7 @@ import yaml
 from PIL import Image, ImageChops
 from tqdm import tqdm
 
-import create_distorted as cd
+import distortion as cd
 
 
 def parse_args():

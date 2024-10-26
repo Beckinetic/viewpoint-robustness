@@ -1,14 +1,14 @@
 data:
   background:
-    - meadow
-    - forest
-    - desert
-    - industrial
+    - ood_meadow
+    - ood_forest
+    - ood_desert
+    - ood_industrial
   view:
    - f
   res:
     - f
 
 sample:
-  sample_num: 1
-  output: sample_f_f
+  sample_num: 5
+  output: robustness_f/content

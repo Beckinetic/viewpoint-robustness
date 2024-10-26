@@ -2,7 +2,6 @@ log:
   view:
     - f
     - r
-    - fx
     - er
     - fx
   background:
@@ -34,22 +33,23 @@ plot:
   decision_proportion_min: 0
   decision_proportion_max: 0.26
   shape_bias_min: 0
-  shape_bias_max: 0.26
+  shape_bias_max: 0.35
   palette:
     f : "#FF1F5B"
     r: "#00CD6C"
     fx: "#009ADE"
   palette_shape_bias:
-    shape_and_texture_proportion: "#A0B1BA"
+#    shape_and_texture_proportion: "#A0B1BA"
     shape_proportion: "#FFC61E"
     texture_proportion: "#F28522"
     shape_bias: "#AF58BA"
   view:
     - "Full view"
     - "Restricted view"
+    - "Extra R. view"
     - "Fixed view"
   shape_bias_metric:
-    - "Shape and Texture Decision Ratio"
+#    - "Shape and Texture Decision Ratio"
     - "Shape Decision Ratio"
     - "Texture Decision Ratio"
     - "Shape Bias"
