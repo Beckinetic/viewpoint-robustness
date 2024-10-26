@@ -21,4 +21,4 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-python -m src.sample_dataset "$CONFIG_PATH" --dataset "$DATASET_PATH"
+python -m src.util.sample_dataset "$CONFIG_PATH" --dataset "$DATASET_PATH"
