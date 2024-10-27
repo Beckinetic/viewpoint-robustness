@@ -1,0 +1,43 @@
+data:
+  eval:
+    num_classes: 32
+    view:
+      - f
+      - r
+      - fx
+      - er
+      - cr
+    suffix:
+    distortion_types:
+      - gaussian_noise
+      - shot_noise
+      - impulse_noise
+      - speckle_noise
+      - gaussian_blur
+      - glass_blur
+      - defocus_blur
+      - motion_blur
+      - zoom_blur
+      - fog
+      - frost
+      - snow
+      - spatter
+      - contrast
+      - brightness
+      - saturate
+      - jpeg_compression
+      - pixelate
+      - elastic_transform
+
+model:
+  backbone: resnet18
+  to_eval:
+    view:
+      - f
+      - r
+      - er
+      - fx
+    res: combined
+    background:
+      - combined
+    max_epoch: 30

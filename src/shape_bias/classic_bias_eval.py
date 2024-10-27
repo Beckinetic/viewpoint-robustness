@@ -42,7 +42,7 @@ backgrounds = config['model']['to_eval']['background']
 max_epoch = config['model']['to_eval']['max_epoch']
 
 
-def main():
+def classic_bias_eval():
     for view in views:
         for background in backgrounds:
             # load model
@@ -116,4 +116,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    classic_bias_eval()
