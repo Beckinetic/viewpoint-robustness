@@ -1,27 +1,27 @@
 data:
   root:
 #    - robustness_f
-    - robustness_r
-#    - robustness_er
-#    - robustness_fx
-#    - robustness_cr
+#    - robustness_r
+    - robustness_er
+    - robustness_fx
+    - robustness_cr
 
 distortion_types:
-#  - gaussian_noise
-#  - shot_noise
-#  - impulse_noise
-#  - speckle_noise
-#  - gaussian_blur
-#  - glass_blur
-#  - defocus_blur
-#  - motion_blur
-#  - zoom_blur
-#  - fog
-#  - frost
-#  - snow
-#  - spatter
-#  - contrast
-#  - brightness
+  - gaussian_noise
+  - shot_noise
+  - impulse_noise
+  - speckle_noise
+  - gaussian_blur
+  - glass_blur
+  - defocus_blur
+  - motion_blur
+  - zoom_blur
+  - fog
+  - frost
+  - snow
+  - spatter
+  - contrast
+  - brightness
   - saturate
   - jpeg_compression
   - pixelate
