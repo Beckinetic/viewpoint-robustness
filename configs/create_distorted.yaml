@@ -1,13 +1,13 @@
 data:
   root:
-#    - robustness_f
+    - robustness_f
 #    - robustness_r
-    - robustness_er
+#    - robustness_er
 #    - robustness_fx
-    - robustness_cr
+#    - robustness_cr
 
 distortion_types:
-#  - gaussian_noise
+  - gaussian_noise
 #  - shot_noise
 #  - impulse_noise
 #  - speckle_noise
@@ -21,8 +21,8 @@ distortion_types:
 #  - snow
 #  - spatter
 #  - contrast
-  - brightness
-  - saturate
-  - jpeg_compression
-  - pixelate
-  - elastic_transform
+#  - brightness
+#  - saturate
+#  - jpeg_compression
+#  - pixelate
+#  - elastic_transform
