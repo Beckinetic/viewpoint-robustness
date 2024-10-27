@@ -1,21 +1,3 @@
 data_folders:
-  - ood_meadow_f_f
-  - ood_meadow_r_f
-  - ood_meadow_er_f
-  - ood_meadow_fx_f
-  - ood_forest_f_f
-  - ood_forest_r_f
-  - ood_forest_er_f
-  - ood_forest_fx_f
-  - ood_desert_f_f
-  - ood_desert_r_f
-  - ood_desert_er_f
-  - ood_desert_fx_f
-  - ood_industrial_f_f
-  - ood_industrial_r_f
-  - ood_industrial_er_f
-  - ood_industrial_fx_f
-  - meadow_cr_f
-  - forest_cr_f
-  - desert_cr_f
-  - industrial_cr_f
+  - robustness_r
+  - robustness_fx
