@@ -101,11 +101,17 @@ def border_cam_distorted():
             }
 
             for eval_view in eval_views:
+                mean_interior_cam_values[eval_view] = {}
+                mean_border_cam_values[eval_view] = {}
+                mean_exterior_cam_values[eval_view] = {}
                 grand_mean_interior_cam_values[eval_view] = {}
                 grand_mean_border_cam_values[eval_view] = {}
                 grand_mean_exterior_cam_values[eval_view] = {}
 
                 for eval_distortion_type in eval_distortion_types:
+                    mean_interior_cam_values[eval_view][eval_distortion_type] = {}
+                    mean_border_cam_values[eval_view][eval_distortion_type] = {}
+                    mean_exterior_cam_values[eval_view][eval_distortion_type] = {}
                     for eval_severity in eval_severities:
                         mean_interior_cam_values[eval_view][eval_distortion_type][eval_severity] = {}
                         mean_border_cam_values[eval_view][eval_distortion_type][eval_severity] = {}
