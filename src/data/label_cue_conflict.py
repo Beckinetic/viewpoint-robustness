@@ -39,6 +39,8 @@ def relabel_cue_conflict():
         with open(os.path.join(folder, 'texture_labels.json'), 'w') as f:
             json.dump(texture_labels, f, indent=4)
 
+        print(f"Labelled {folder}")
+
 
 if __name__ == '__main__':
     relabel_cue_conflict()
