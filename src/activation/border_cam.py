@@ -148,3 +148,7 @@ def border_cam():
 
             with open(save_path, 'wb') as f:
                 pickle.dump(results, f)
+
+
+if __name__ == '__main__':
+    border_cam()
