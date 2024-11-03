@@ -2,12 +2,21 @@ log:
   view:
     - f
     - r
+    - er
     - fx
   background:
     - combined
   res: combined
-  cue_conflict: cue_conflict_f
-  pasted: false
+  eval:
+    view:
+      - f
+      - r
+      - er
+      - fx
+      - cr
+    ood_view:
+      - cr
+    suffix:
 
 model:
   model_name: resnet18
@@ -29,6 +38,7 @@ plot:
   palette:
     f : "#FF1F5B"
     r: "#00CD6C"
+    er: "#AF58BA"
     fx: "#009ADE"
   palette_shape_bias:
     shape_and_texture_proportion: "#A0B1BA"
@@ -38,6 +48,7 @@ plot:
   view:
     - "Full view"
     - "Restricted view"
+    - "Extra restricted view"
     - "Fixed view"
   shape_bias_metric:
     - "Shape and Texture Decision Ratio"

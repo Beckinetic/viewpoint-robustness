@@ -1,0 +1,28 @@
+data:
+  eval:
+    num_classes: 32
+    view:
+      - test_f
+      - test_r
+      - test_er
+      - test_fx
+      - cr
+    background:
+      - meadow
+      - forest
+      - desert
+      - industrial
+    res: f
+
+model:
+  to_eval:
+    backbone: resnet18
+    view:
+      - f
+      - r
+      - er
+      - fx
+    res: combined
+    background:
+      - combined
+    max_epoch: 30

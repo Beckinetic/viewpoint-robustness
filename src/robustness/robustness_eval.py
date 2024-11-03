@@ -69,6 +69,7 @@ def robustness_eval():
 
             # initialise result vessels
             distortion_acc = {}
+            distortion_loss = {}
             content_acc = {}
             content_loss = {}
 
@@ -96,8 +97,10 @@ def robustness_eval():
                     # evaluate distortion accuracy
                     logging.info(f"Evaluating on distortion dataset")
                     distortion_acc[key] = {}
+                    distortion_loss[key] = {}
                     for distortion_type in distortion_types:
                         distortion_acc[key][distortion_type] = {}
+                        distortion_loss[key][distortion_type] = {}
                         for severity in severities:
                             logging.info(f"{distortion_type}, severity: {severity}")
                             distortion_image_paths = glob.glob(os.path.join(distorted_data_path, distortion_type,
@@ -108,13 +111,15 @@ def robustness_eval():
                                 distortion_labels = json.load(f)
                             distortion_dataset = CustomDataset(distortion_image_paths, distortion_labels, transform)
                             distortion_loader = torch.utils.data.DataLoader(distortion_dataset, batch_size=1, shuffle=False)
-                            distortion_acc[key][distortion_type][str(severity)] = test_model(model, distortion_loader)
+                            (distortion_loss[key][distortion_type][str(severity)],
+                             distortion_acc[key][distortion_type][str(severity)]) = test_model(model, distortion_loader)
                             logging.info(
                                 f"Distortion accuracy on epoch {max_epoch}, {distortion_type}, severity: {severity}: "
                                 f"{distortion_acc[key][distortion_type][str(severity)]}")
 
             # save results
             results = {'da': distortion_acc,
+                       'dl': distortion_loss,
                        'ca': content_acc,
                        'cl': content_loss}
 

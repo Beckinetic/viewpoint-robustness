@@ -1,3 +1,17 @@
 data_folders:
-  - robustness_r
-  - robustness_fx
+  - meadow_test_f_f
+  - forest_test_f_f
+  - desert_test_f_f
+  - industrial_test_f_f
+  - meadow_test_r_f
+  - forest_test_r_f
+  - desert_test_r_f
+  - industrial_test_r_f
+  - meadow_test_er_f
+  - forest_test_er_f
+  - desert_test_er_f
+  - industrial_test_er_f
+  - meadow_test_fx_f
+  - forest_test_fx_f
+  - desert_test_fx_f
+  - industrial_test_fx_f
