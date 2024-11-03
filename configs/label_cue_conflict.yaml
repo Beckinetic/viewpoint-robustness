@@ -1,1 +1,6 @@
 data_folders:
+  - cue_conflict_f
+  - cue_conflict_r
+  - cue_conflict_er
+  - cue_conflict_fx
+  - cue_conflict_cr
