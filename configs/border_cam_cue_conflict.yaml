@@ -2,10 +2,10 @@ data:
   eval:
     num_classes: 32
     view:
-      - f
-      - r
-      - er
-      - fx
+      - test_f
+      - test_r
+      - test_er
+      - test_fx
       - cr
     background:
       - meadow

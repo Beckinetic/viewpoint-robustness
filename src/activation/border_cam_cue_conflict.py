@@ -109,7 +109,7 @@ def border_cam_cue_conflict():
                 mean_exterior_cam_values_texture[eval_view] = {}
 
                 # prepare eval data
-                eval_data_folder = os.path.join(data_dir, '_'.join(['cue_conflict', eval_view]), 'output')
+                eval_data_folder = os.path.join(data_dir, '_'.join(['cue_conflict', eval_view.split('_')[-1]]), 'output')
 
                 # prepare gt data
                 gt_data_folders = []
