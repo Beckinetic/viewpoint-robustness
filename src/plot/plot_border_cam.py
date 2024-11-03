@@ -2,18 +2,22 @@ import argparse
 import os
 import pickle
 
-import numpy as np
 import yaml
-from matplotlib import pyplot as plt, lines
+import seaborn as sns
+import pandas as pd
+from matplotlib import pyplot as plt
+from statannotations.Annotator import Annotator
+from scipy.stats import ttest_rel
 
-# set rc parameters
+# Set seaborn style
+sns.set_theme(style="whitegrid")
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = 'Arial'
 plt.rcParams['font.weight'] = '500'  # medium weight
 plt.rcParams['font.stretch'] = 'semi-expanded'  # slightly expanded
 plt.rcParams['figure.dpi'] = 300
 
-# parse arguments
+# Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('config', type=str)
 parser.add_argument('--log-dir', type=str, default='logs/')
@@ -25,121 +29,83 @@ with open(args.config, 'r') as f:
 log_dir = args.log_dir
 plot_dir = args.plot_dir
 
-model_name = config['model']['model_name']
-max_epoch = config['model']['max_epoch']
-epochs = range(1, max_epoch + 1)
 views = config['log']['view']
-res = config['log']['res']
-cue_conflict = config['log']['eval_views']
-pasted = config['log']['pasted']
 backgrounds = config['log']['background']
-loss_min = config['plot']['loss_min']
-loss_max = config['plot']['loss_max']
-acc_min = config['plot']['acc_min']
-acc_max = config['plot']['acc_max']
-loss_change_min = config['plot']['loss_change_min']
-loss_change_max = config['plot']['loss_change_max']
-acc_change_min = config['plot']['acc_change_min']
-acc_change_max = config['plot']['acc_change_max']
-decision_proportion_min = config['plot']['decision_proportion_min']
-decision_proportion_max = config['plot']['decision_proportion_max']
-shape_bias_min = config['plot']['shape_bias_min']
-shape_bias_max = config['plot']['shape_bias_max']
+res = config['log']['res']
+ood_views = config['log']['eval']['ood_view']
+
 palette = config['plot']['palette']
-palette_shape_bias = config['plot']['palette_shape_bias']
-colors = list(palette.values())
 view_plot_name = config['plot']['view']
-shape_bias_metric = config['plot']['shape_bias_metric']
-distortion_types = config['plot']['distortion_types']
-max_severity = config['plot']['max_severity']
 cam_types = config['plot']['cam_types']
 
 
 def plot_border_cam():
-    fig, axes = plt.subplots(2, 3, figsize=(16, 6))
+    fig, axes = plt.subplots(3, 3, figsize=(16, 6))
     fig.subplots_adjust(left=0.1, right=0.7, wspace=0.3)
 
-    # plot individual cams
     for ind_cam, cam_type in enumerate(cam_types):
-        # counts_array = np.zeros((len(views) * len(backgrounds), 10))
-        cam_data_per_view = []
+        data_matched = []
+        data_non_matched = []
+        data_ood = []
+
         for ind_background, background in enumerate(backgrounds):
             for ind_view, view in enumerate(views):
                 log_folder = '_'.join([background, view, res])
-                result_path = os.path.join(log_dir, log_folder, 'activations', str(max_epoch), view,
-                                           '_'.join([cam_type, 'cams.pkl']))
-                with open(result_path, 'rb') as f:
-                    cams = pickle.load(f)
+                border_cam_path = os.path.join(log_dir, log_folder, 'border_cam.pkl')
+                with open(border_cam_path, 'rb') as f:
+                    border_cam = pickle.load(f)
 
-                mean_cam_per_img = np.array([np.mean(item) for item in cams])
-                mean_cam_per_img = mean_cam_per_img[~np.isnan(mean_cam_per_img)]
-                # bins = np.arrange(0, 1.1, 0.1)  # Bins from 0 to 1, in steps of 0.1
-                # counts, bin_edges = np.histogram(mean_cam_per_img, bins=bins)
-                # counts_array[ind_view] = counts
-                cam_data_per_view.append(mean_cam_per_img)
+                values_matched = border_cam[view].values()
+                data_matched.extend([(cam_type, view_plot_name[i], val) for i, val in enumerate(values_matched)])
 
-        cam_data_per_view = np.array(cam_data_per_view)
-
-        ax = axes[0, ind_cam]
-        bplot = ax.boxplot(cam_data_per_view, labels=view_plot_name, patch_artist=True)
-        for patch, color in zip(bplot['boxes'], colors):
-            patch.set_facecolor(color)
-        ax.set_xlim([0.1, len(views) + 0.9])
-        ax.set_ylim([0, 1.1])
-        ax.set_title(cam_type.capitalize() + ' CAM')
-        if ind_cam == 0:
-            ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-            ax.set_xticklabels([])
-            ax.set_ylabel('CAM Value')
-        else:
-            ax.set_xticklabels([])
-            ax.set_yticklabels([])
-
-    for ind_cam, cam_type in enumerate(cam_types):
-        cam_data_per_view = []
-        for ind_background, background in enumerate(backgrounds):
-            for ind_view, view in enumerate(views):
-                log_folder = '_'.join([background, view, res])
                 other_views = [item for item in views if item != view]
-                mean_cam_per_img = []
                 for other_view in other_views:
-                    result_path = os.path.join(log_dir, log_folder, 'activations', str(max_epoch), other_view,
-                                               '_'.join([cam_type, 'cams.pkl']))
-                    with open(result_path, 'rb') as f:
-                        cams = pickle.load(f)
+                    values_non_matched = border_cam[other_view].values()
+                    data_non_matched.extend(
+                        [(cam_type, view_plot_name[i], val) for i, val in enumerate(values_non_matched)])
 
-                    mean_cam_per_img.extend([np.mean(item) for item in cams])
+                for ood_view in ood_views:
+                    values_ood = border_cam[ood_view].values()
+                    data_ood.extend([(cam_type, view_plot_name[i], val) for i, val in enumerate(values_ood)])
 
-                mean_cam_per_img = np.array(mean_cam_per_img)
-                mean_cam_per_img = mean_cam_per_img[~np.isnan(mean_cam_per_img)]
-                # bins = np.arange(0, 1.1, 0.1)  # Bins from 0 to 1, in steps of 0.1
-                # counts, bin_edges = np.histogram(mean_cam_per_img, bins=bins)
-                # counts_array[ind_view] = counts
-                cam_data_per_view.append(mean_cam_per_img)
+        # Convert data to DataFrame for seaborn
+        df_matched = pd.DataFrame(data_matched, columns=['CAM Type', 'View', 'Value'])
+        df_non_matched = pd.DataFrame(data_non_matched, columns=['CAM Type', 'View', 'Value'])
+        df_ood = pd.DataFrame(data_ood, columns=['CAM Type', 'View', 'Value'])
 
-        ax = axes[1, ind_cam]
-        # ax.stackplot(np.arange(0, 1, 0.1), counts_array, labels=view_plot_name, colors=palette.values(), alpha=0.6)
-        # ax.set_xlim([0, 1])
-        # ax.set_ylim([0, 124000])
-        bplot = ax.boxplot(cam_data_per_view, labels=view_plot_name, patch_artist=True)
-        for patch, color in zip(bplot['boxes'], colors):
-            patch.set_facecolor(color)
-        ax.set_xlim([0.1, len(views) + 0.9])
-        ax.set_ylim([0, 1.1])
-        if ind_cam == 0:
-            ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-            ax.set_ylabel('CAM Value')
-        else:
-            ax.set_yticklabels([])
+        # Define pairs for comparison
+        pairs = [(view_plot_name[i], view_plot_name[j]) for i in range(len(view_plot_name))
+                 for j in range(i + 1, len(view_plot_name))]
 
-        if ind_cam == 1:
-            ax.set_xlabel('CAM Value')
+        # Plot matched data
+        sns.boxplot(ax=axes[0, ind_cam], x='View', y='Value', data=df_matched, palette=palette)
+        axes[0, ind_cam].set_title(f'{cam_type.capitalize()} CAM - Matched')
+        axes[0, ind_cam].set_ylim(0, 1.1)
+        annotator = Annotator(axes[0, ind_cam], pairs, data=df_matched, x='View', y='Value')
+        annotator.configure(test='t-test_paired', text_format='star', comparisons_correction='bonferroni')
+        annotator.apply_and_annotate()
 
-    color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
-                    for color in palette.values()]
-    axes[1, len(cam_types) - 1].legend(color_legend, view_plot_name, loc=(1.1, 0))
+        # Plot non-matched data
+        sns.boxplot(ax=axes[1, ind_cam], x='View', y='Value', data=df_non_matched, palette=palette)
+        axes[1, ind_cam].set_title(f'{cam_type.capitalize()} CAM - Non-Matched')
+        axes[1, ind_cam].set_ylim(0, 1.1)
+        annotator = Annotator(axes[1, ind_cam], pairs, data=df_non_matched, x='View', y='Value')
+        annotator.configure(test='t-test_paired', text_format='star', comparisons_correction='bonferroni')
+        annotator.apply_and_annotate()
 
-    # save the plot
+        # Plot OOD data
+        sns.boxplot(ax=axes[2, ind_cam], x='View', y='Value', data=df_ood, palette=palette)
+        axes[2, ind_cam].set_title(f'{cam_type.capitalize()} CAM - OOD')
+        axes[2, ind_cam].set_ylim(0, 1.1)
+        annotator = Annotator(axes[2, ind_cam], pairs, data=df_ood, x='View', y='Value')
+        annotator.configure(test='t-test_paired', text_format='star', comparisons_correction='bonferroni')
+        annotator.apply_and_annotate()
+
+    # Add a legend for the bottom right plot
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    axes[2, len(cam_types) - 1].legend(handles, labels, loc='upper left', bbox_to_anchor=(1.05, 1))
+
+    # Save the plot
     save_path = os.path.join(plot_dir, 'border_cam.png')
     plt.savefig(save_path)
     plt.close(fig)

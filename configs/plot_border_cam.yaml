@@ -1,0 +1,34 @@
+log:
+  view:
+    - f
+    - r
+    - er
+    - fx
+  background:
+    - combined
+  res: combined
+  eval:
+    view:
+      - f
+      - r
+      - er
+      - fx
+      - cr
+    ood_view: cr
+    suffix:
+
+plot:
+  palette:
+    f : "#FF1F5B"
+    r: "#00CD6C"
+    er: "#AF58BA"
+    fx: "#009ADE"
+  view:
+    - "Full view"
+    - "Restricted view"
+    - "Extra R. view"
+    - "Fixed view"
+  cam_types:
+    - ic
+    - bc
+    - ec

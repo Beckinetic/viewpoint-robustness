@@ -1,0 +1,49 @@
+data:
+  eval:
+    num_classes: 32
+    view:
+      - test_f
+      - test_r
+      - test_er
+      - test_fx
+      - cr
+    background:
+      - meadow
+      - forest
+      - desert
+      - industrial
+    res: f
+    distortion_types:
+      - gaussian_noise
+      - shot_noise
+      - impulse_noise
+      - speckle_noise
+      - gaussian_blur
+      - glass_blur
+      - defocus_blur
+      - motion_blur
+      - zoom_blur
+      - fog
+      - frost
+      - snow
+      - spatter
+      - contrast
+      - brightness
+      - saturate
+      - jpeg_compression
+      - pixelate
+      - elastic_transform
+    sample_size: 96
+
+model:
+  to_eval:
+    backbone: resnet18
+    view:
+      - f
+      - r
+      - er
+      - fx
+    res: combined
+    background:
+      - combined
+    max_epoch: 30
