@@ -96,7 +96,6 @@ def plot_border_cam():
             ax.set_yticklabels([])
 
     for ind_cam, cam_type in enumerate(cam_types):
-        #counts_array = np.zeros((len(views) * len(backgrounds), 10))
         cam_data_per_view = []
         for ind_background, background in enumerate(backgrounds):
             for ind_view, view in enumerate(views):

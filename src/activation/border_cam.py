@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import pickle
+import random
 import sys
 import warnings
 
@@ -42,6 +43,10 @@ num_classes = config['data']['eval']['num_classes']
 eval_views = config['data']['eval']['view']
 eval_backgrounds = config['data']['eval']['background']
 eval_res = config['data']['eval']['res']
+if config['data']['eval']['sample_size']:
+    sample_size = config['data']['eval']['sample_size']
+else:
+    sample_size = ""
 backbone = config['model']['to_eval']['backbone']
 views = config['model']['to_eval']['view']
 backgrounds = config['model']['to_eval']['background']
@@ -96,6 +101,9 @@ def border_cam():
                     with open(eval_labels_path) as f:
                         eval_labels = json.load(f)
                     eval_data_paths = glob.glob(eval_data_folder + '/*.png')
+                    if sample_size:
+                        random.seed(42)
+                        eval_data_paths = random.sample(eval_data_paths, sample_size)
                     unique_labels = sorted(set(eval_labels.values()))
                     class_map = {label: index for index, label in enumerate(unique_labels)}
 
@@ -152,4 +160,3 @@ def border_cam():
 
 if __name__ == '__main__':
     border_cam()
-    

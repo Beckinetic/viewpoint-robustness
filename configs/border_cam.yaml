@@ -13,6 +13,7 @@ data:
       - desert
       - industrial
     res: f
+    sample_size: 2048
 
 model:
   to_eval:
