@@ -144,7 +144,8 @@ def border_cam_cue_conflict():
 
                     # prepare ground truth image
                     eval_data_filename = os.path.basename(eval_data_path)
-                    gt_image_path = find_gt_image(eval_data_path, gt_data_folders)
+                    gt_filename = '_'.join(eval_data_filename.split('_')[0:3]) + '.png'
+                    gt_image_path = find_gt_image(gt_filename, gt_data_folders)
                     gt_image = Image.open(gt_image_path)
 
                     # extract alpha channel (object mask)
