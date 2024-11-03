@@ -33,10 +33,10 @@ def relabel_cue_conflict():
             shape_labels[image_path] = annotations[shape_image_id]
             texture_labels[image_path] = annotations[texture_image_id]
 
-        with open(os.path.join(folder, 'output', 'shape_labels.json'), 'w') as f:
+        with open(os.path.join(root, folder, 'output', 'shape_labels.json'), 'w') as f:
             json.dump(shape_labels, f, indent=4)
 
-        with open(os.path.join(folder, 'output', 'texture_labels.json'), 'w') as f:
+        with open(os.path.join(root, folder, 'output', 'texture_labels.json'), 'w') as f:
             json.dump(texture_labels, f, indent=4)
 
         print(f"Labelled {folder}")
