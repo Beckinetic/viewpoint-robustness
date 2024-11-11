@@ -37,6 +37,7 @@ plot:
   palette:
     f : "#FF1F5B"
     r: "#00CD6C"
+    er: "#AF58BA"
     fx: "#009ADE"
   palette_shape_bias:
 #    shape_and_texture_proportion: "#A0B1BA"

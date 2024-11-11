@@ -9,13 +9,17 @@ log:
   res: combined
   eval:
     view:
-      - f
-      - r
-      - er
-      - fx
+      - test_f
+      - test_r
+      - test_er
+      - test_fx
+    ood_view:
       - cr
-    ood_view: cr
-    suffix:
+    type:
+      - border_cam
+      - border_cam_cue_conflict_shape
+      - border_cam_cue_conflict_texture
+      - grand_cam_distorted
 
 plot:
   palette:
