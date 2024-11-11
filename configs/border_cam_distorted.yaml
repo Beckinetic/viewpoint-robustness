@@ -33,7 +33,7 @@ data:
       - jpeg_compression
       - pixelate
       - elastic_transform
-    sample_size: 96
+    sample_size:
 
 model:
   to_eval:
