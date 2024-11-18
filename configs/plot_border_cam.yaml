@@ -28,10 +28,10 @@ plot:
     er: "#AF58BA"
     fx: "#009ADE"
   view:
-    - "Full view"
-    - "Restricted view"
-    - "Extra R. view"
-    - "Fixed view"
+    - "Full"
+    - "Restricted"
+    - "Extra R."
+    - "Fixed"
   cam_types:
     - ic
     - bc

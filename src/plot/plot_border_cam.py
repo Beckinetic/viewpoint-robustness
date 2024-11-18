@@ -43,8 +43,8 @@ cam_types = config['plot']['cam_types']
 
 def plot_border_cam():
     for eval_type in eval_types:
-        fig, axes = plt.subplots(2, 3, figsize=(16, 10))
-        fig.subplots_adjust(left=0.1, right=0.7, wspace=0.3)
+        fig, axes = plt.subplots(2, 3, figsize=(12, 7))
+        fig.subplots_adjust(left=0.1, right=0.85, wspace=0.3)
 
         for ind_cam, cam_type in enumerate(cam_types):
             data_matched = []
@@ -94,9 +94,11 @@ def plot_border_cam():
             # Plot matched data
             sns.barplot(ax=axes[0, ind_cam], x='View', y='Value', data=df_matched, palette=palette)
             axes[0, ind_cam].set_title(f'{cam_names[cam_type]} CAM - In-distribution')
-            axes[0, ind_cam].set_ylim(0.25, 0.75)
+            axes[0, ind_cam].set_ylim(0.5, 0.75)
+            axes[0, ind_cam].set_xlabel("")
+            axes[0, ind_cam].set_xticks([])
             # annotator = Annotator(axes[0, ind_cam], pairs, data=df_matched, x='View', y='Value')
-            # annotator.configure(test='t-test_ind', text_format='star', comparisons_correction='bonferroni')
+            # annotator.configure(test='t-test_paired', text_format='star', comparisons_correction='bonferroni')
             # annotator.apply_and_annotate()
 
             # Plot non-matched data
@@ -110,10 +112,21 @@ def plot_border_cam():
             # Plot OOD data
             sns.barplot(ax=axes[1, ind_cam], x='View', y='Value', data=df_ood, palette=palette)
             axes[1, ind_cam].set_title(f'{cam_names[cam_type]} CAM - OOD')
-            axes[1, ind_cam].set_ylim(0.25, 0.75)
-            # annotator = Annotator(axes[2, ind_cam], pairs, data=df_ood, x='View', y='Value')
-            # annotator.configure(test='t-test_ind', text_format='star', comparisons_correction='bonferroni')
+            axes[1, ind_cam].set_ylim(0.5, 0.75)
+            axes[1, ind_cam].set_xlabel("Models")
+            axes[1, ind_cam].set_xticklabels(view_plot_name)
+            # annotator = Annotator(axes[1, ind_cam], pairs, data=df_ood, x='View', y='Value')
+            # annotator.configure(test='t-test_paired', text_format='star', comparisons_correction='bonferroni')
             # annotator.apply_and_annotate()
+            if ind_cam == 2:
+                axes[0, ind_cam].set_ylim(0.25, 0.5)
+                axes[1, ind_cam].set_ylim(0.25, 0.5)
+            if ind_cam > 0:
+                axes[0, ind_cam].set_ylabel("")
+                axes[1, ind_cam].set_ylabel("")
+            else:
+                axes[0, ind_cam].set_ylabel("CAM Value")
+                axes[1, ind_cam].set_ylabel("CAM Value")
 
         # Add a legend for the bottom right plot
         handles, labels = axes[0, 0].get_legend_handles_labels()

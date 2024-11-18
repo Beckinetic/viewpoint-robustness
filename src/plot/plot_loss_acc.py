@@ -90,7 +90,7 @@ def plot_train_acc_loss():
 def plot_val_acc_loss():
     # plot validation accuracy and loss
     # set plotting canvas
-    fig, (ax1, ax3) = plt.subplots(1, 2, figsize=(16, 6))
+    fig, (ax1, ax3) = plt.subplots(1, 2, figsize=(14, 7))
     fig.subplots_adjust(left=0.1, right=0.8, wspace=0.2)
 
     # plot the validation accuracy and loss on the same view images (Figure 1-B)
@@ -109,14 +109,14 @@ def plot_val_acc_loss():
             validation_acc = validation_acc[view][0:max_epoch]
 
             # plot accuracy
-            ax1.plot(epochs, validation_acc, color=palette[view])
+            ax1.plot(epochs, validation_acc, color=palette[view], linewidth=2)
             ax1.set_xlabel('Epoch')
             ax1.set_ylabel('Accuracy (%)')
             ax1.set_ylim([acc_min, acc_max])
-            ax1.set_title("Validation Accuracy on In-distribution Viewpoint Data")
+            ax1.set_title("Test Accuracy on In-distribution Viewpoint Data")
 
             # global plot settings
-            ax1.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+            ax1.grid(visible=True, linestyle='--', linewidth=1, color='gray', alpha=0.6)
 
     # # plot the accuracy and loss when validated on non-matched view images
     # for background in backgrounds:
@@ -162,13 +162,14 @@ def plot_val_acc_loss():
                 test_acc = result['tea'][test_view][0:max_epoch]
 
                 # plot accuracy
-                ax3.plot(epochs, test_acc, color=palette[view])
+                ax3.plot(epochs, test_acc, color=palette[view], linewidth=2)
                 ax3.set_xlabel('Epoch')
                 ax3.set_ylim([acc_min, acc_max])
+                ax3.set_yticks([])
                 ax3.set_title("Testing Accuracy on OOD Viewpoint Data")
 
                 # global plot settings
-                ax3.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+                ax3.grid(visible=True, linestyle='--', linewidth=1, color='gray', alpha=0.6)
 
                 # create color legend
                 color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)

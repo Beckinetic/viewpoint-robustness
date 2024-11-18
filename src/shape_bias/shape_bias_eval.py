@@ -158,8 +158,4 @@ def evaluate_model_shape_bias(model, data_loader, device):
                 if predicted[i].item() == texture_label:
                     category_texture_decisions[shape_label] += 1
 
-    # Calculate the shape and texture bias for each category
-    # shape_bias = {label: category_shape_decisions[label] / category_totals[label] for label in category_totals}
-    # texture_bias = {label: category_texture_decisions[label] / category_totals[label] for label in category_totals}
-
     return category_shape_decisions, category_texture_decisions, category_totals

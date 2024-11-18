@@ -102,11 +102,11 @@ def get_standard_errors(shape_decisions, texture_decisions, all_decisions):
 
 def plot_shape_bias(suffix):
     # plot for the decision proportions and shape bias (Figure 2)
-    fig, axes = plt.subplots(2, 2, figsize=(12, 7))
+    fig, axes = plt.subplots(2, 2, figsize=(14, 7))
     ax1, ax2, ax5, ax6 = axes.flatten()
-    fig.subplots_adjust(left=0.1, right=0.85, wspace=0.05)
-    width_factor_decisions = 0.8
-    width_factor_shape_bias = 0.6
+    fig.subplots_adjust(left=0.1, right=0.8, wspace=0.2)
+    width_factor_decisions = 0.9
+    width_factor_shape_bias = 0.8
 
     def make_narrower(ax, width_factor):
         pos = ax.get_position()  # Get the original position
@@ -176,6 +176,7 @@ def plot_shape_bias(suffix):
     ax2.set_xticks([])
     ax2.set_xticklabels([])
     ax1.title.set_text('In-distribution Viewpoint Data')
+    ax2.title.set_text('In-distribution Viewpoint Data')
 
     # # plot mean shape bias on viewpoint non-matched datasets
     # for ind_background, background in enumerate(backgrounds):
@@ -310,6 +311,7 @@ def plot_shape_bias(suffix):
     ax5.set_xticks([])
     ax5.set_xticklabels([])
     ax5.title.set_text('OOD Viewpoint Data')
+    ax6.title.set_text('OOD Viewpoint Data')
 
     # set common labels
     fig.text(0.05, 0.5, 'Decision Proportion', va='center', rotation='vertical', fontsize=12)

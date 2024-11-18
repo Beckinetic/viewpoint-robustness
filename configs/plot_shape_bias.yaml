@@ -43,7 +43,7 @@ plot:
 #    shape_and_texture_proportion: "#A0B1BA"
     shape_proportion: "#FFC61E"
     texture_proportion: "#F28522"
-    shape_bias: "#AF58BA"
+    shape_bias: "#089099"
   view:
     - "Full view"
     - "Restricted view"
@@ -51,7 +51,7 @@ plot:
     - "Fixed view"
   shape_bias_metric:
 #    - "Shape and Texture Decision Ratio"
-    - "Shape Decision Ratio"
-    - "Texture Decision Ratio"
+    - "Shape Decision Proportion"
+    - "Texture Decision Proportion"
     - "Shape Bias"
 

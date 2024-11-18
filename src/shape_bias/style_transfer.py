@@ -120,7 +120,7 @@ def gram_matrix(tensor):
     return gram
 
 
-def style_transfer(content, style, filename, output_dir, steps=2000):
+def style_transfer(content, style, filename, output_dir, steps=5000):
     # get content and style features only once before forming the target image
     content_features = get_features(content, vgg)
     style_features = get_features(style, vgg)
