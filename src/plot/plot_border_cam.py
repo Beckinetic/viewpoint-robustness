@@ -76,6 +76,7 @@ def plot_border_cam():
                     values_matched = border_cam[cam_type][eval_view].values()
                     data_matched.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_matched)])
                     if decision_filter_key:
+                        print(decision_filter_key)
                         values_matched = [border_cam[cam_type][eval_view][key] for key in decision_filter if
                                            key in border_cam[cam_type][eval_view]]
                         data_matched.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_matched)])
@@ -90,6 +91,7 @@ def plot_border_cam():
                         values_ood = border_cam[cam_type][ood_view].values()
                         data_ood.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_ood)])
                         if decision_filter_key:
+                            print(decision_filter_key)
                             values_ood = [border_cam[cam_type][ood_view][key] for key in decision_filter if
                                                key in border_cam[cam_type][ood_view]]
                             data_ood.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_ood)])
