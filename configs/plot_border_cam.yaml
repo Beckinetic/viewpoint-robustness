@@ -20,6 +20,7 @@ log:
       - border_cam_cue_conflict_shape
       - border_cam_cue_conflict_texture
       - grand_cam_distorted
+    filter:
 
 plot:
   palette:
