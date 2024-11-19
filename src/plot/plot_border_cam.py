@@ -67,13 +67,13 @@ def plot_border_cam():
                         decision_filter_path = os.path.join(log_dir, log_folder, 'decision_filter.pkl')
                         with open(decision_filter_path, 'rb') as f:
                             decision_filter_all = pickle.load(f)
-                        decision_filter = decision_filter_all[decision_filter_key][eval_view.split('_')[-1]]
 
                     with open(border_cam_path, 'rb') as f:
                         border_cam = pickle.load(f)
 
                     values_matched = border_cam[cam_type][eval_view].values()
                     if decision_filter_key:
+                        decision_filter = decision_filter_all[decision_filter_key][eval_view.split('_')[-1]]
                         values_matched = [border_cam[cam_type][eval_view][key] for key in decision_filter if
                                            key in border_cam[cam_type][eval_view]]
                     data_matched.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_matched)])
@@ -87,6 +87,7 @@ def plot_border_cam():
                     for ood_view in ood_views:
                         values_ood = border_cam[cam_type][ood_view].values()
                         if decision_filter_key:
+                            decision_filter = decision_filter_all[decision_filter_key][ood_view]
                             values_ood = [border_cam[cam_type][ood_view][key] for key in decision_filter if
                                                key in border_cam[cam_type][ood_view]]
                         data_ood.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_ood)])
