@@ -38,6 +38,7 @@ eval_types = config['log']['eval']['type']
 decision_filter_key = ""
 if config['log']['eval']['filter']:
     decision_filter_key = config['log']['eval']['filter']
+print(decision_filter_key)
 palette = config['plot']['palette']
 view_plot_name = config['plot']['view']
 cam_types = config['plot']['cam_types']
