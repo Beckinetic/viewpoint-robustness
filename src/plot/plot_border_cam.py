@@ -66,8 +66,8 @@ def plot_border_cam():
                     if decision_filter_key:
                         decision_filter_path = os.path.join(log_dir, log_folder, 'decision_filter.pkl')
                         with open(decision_filter_path, 'rb') as f:
-                            decision_filter = pickle.load(f)
-                        decision_filter = decision_filter[decision_filter_key][eval_view.split('_')[-1]]
+                            decision_filter_all = pickle.load(f)
+                        decision_filter = decision_filter_all[decision_filter_key][eval_view.split('_')[-1]]
 
                     with open(border_cam_path, 'rb') as f:
                         border_cam = pickle.load(f)
