@@ -150,7 +150,7 @@ def evaluate_model_shape_bias(model, data_loader, device):
             for i in range(len(shape_labels)):
                 shape_label = shape_labels[i].item()
                 texture_label = texture_labels[i].item()
-                image_filename = os.path.basename(img_paths[i].item())
+                image_filename = os.path.basename(img_paths[i])
 
                 # Update totals for each category
                 if shape_label not in category_totals:
