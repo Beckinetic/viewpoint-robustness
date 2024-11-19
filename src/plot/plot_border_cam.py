@@ -38,7 +38,6 @@ eval_types = config['log']['eval']['type']
 decision_filter_key = ""
 if config['log']['eval']['filter']:
     decision_filter_key = config['log']['eval']['filter']
-print(decision_filter_key)
 palette = config['plot']['palette']
 view_plot_name = config['plot']['view']
 cam_types = config['plot']['cam_types']
@@ -74,12 +73,10 @@ def plot_border_cam():
                         border_cam = pickle.load(f)
 
                     values_matched = border_cam[cam_type][eval_view].values()
-                    data_matched.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_matched)])
                     if decision_filter_key:
-                        print(decision_filter_key)
                         values_matched = [border_cam[cam_type][eval_view][key] for key in decision_filter if
                                            key in border_cam[cam_type][eval_view]]
-                        data_matched.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_matched)])
+                    data_matched.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_matched)])
 
                     # other_views = [item for item in eval_views if item != eval_view]
                     # for other_view in other_views:
@@ -89,12 +86,10 @@ def plot_border_cam():
 
                     for ood_view in ood_views:
                         values_ood = border_cam[cam_type][ood_view].values()
-                        data_ood.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_ood)])
                         if decision_filter_key:
-                            print(decision_filter_key)
                             values_ood = [border_cam[cam_type][ood_view][key] for key in decision_filter if
                                                key in border_cam[cam_type][ood_view]]
-                            data_ood.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_ood)])
+                        data_ood.extend([(cam_type, views[ind_view], val) for i, val in enumerate(values_ood)])
 
             # Convert data to DataFrame for seaborn
             df_matched = pd.DataFrame(data_matched, columns=['CAM Type', 'View', 'Value'])
