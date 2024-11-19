@@ -14,7 +14,7 @@ log:
       - er
       - fx
       - cr
-    ood_view: cr
+    ood_view: fx
     suffix:
 
 model:

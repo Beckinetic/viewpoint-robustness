@@ -132,6 +132,11 @@ def evaluate_model_shape_bias(model, data_loader, device):
     category_texture_decisions = {}
     category_totals = {}
 
+    # Initialize image-specific counters
+    shape_decisions = []
+    texture_decisions = []
+    neither_decisions = []
+
     with torch.no_grad():  # Disable gradient computation
         for images, shape_labels, texture_labels, img_paths in tqdm(data_loader,
                                                                     desc="Testing on Cue-Conflict Dataset"):
@@ -145,6 +150,7 @@ def evaluate_model_shape_bias(model, data_loader, device):
             for i in range(len(shape_labels)):
                 shape_label = shape_labels[i].item()
                 texture_label = texture_labels[i].item()
+                image_filename = os.path.basename(img_paths[i].item())
 
                 # Update totals for each category
                 if shape_label not in category_totals:
@@ -155,7 +161,11 @@ def evaluate_model_shape_bias(model, data_loader, device):
                 category_totals[shape_label] += 1
                 if predicted[i].item() == shape_label:
                     category_shape_decisions[shape_label] += 1
+                    shape_decisions.append(image_filename)
                 if predicted[i].item() == texture_label:
                     category_texture_decisions[shape_label] += 1
+                    texture_decisions.append(image_filename)
+                else:
+                    neither_decisions.append(image_filename)
 
-    return category_shape_decisions, category_texture_decisions, category_totals
+    return category_shape_decisions, category_texture_decisions, category_totals, shape_decisions, texture_decisions, neither_decisions

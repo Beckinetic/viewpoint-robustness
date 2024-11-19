@@ -58,6 +58,10 @@ def classic_bias_eval():
             texture_decisions = {}
             total_decisions = {}
 
+            image_shape_decisions = {}
+            image_texture_decisions = {}
+            image_neither_decisions = {}
+
             # get cue-conflict dataset
             for eval_view in eval_views:
                 for suffix in suffixes:
@@ -93,9 +97,10 @@ def classic_bias_eval():
                     logging.info(f"Evaluating on content dataset")
                     content_accuracy = test_model(model, content_dataloader)
                     logging.info(f"Evaluating on cue-conflict {eval_view} dataset")
-                    shape_decision, texture_decision, total_decision = evaluate_model_shape_bias(model,
-                                                                                                 cue_conflict_dataloader,
-                                                                                                 device)
+                    shape_decision, texture_decision, total_decision, image_shape_decision,\
+                        image_texture_decision, image_neither_decision = evaluate_model_shape_bias(model,
+                                                                                                     cue_conflict_dataloader,
+                                                                                                     device)
                     if suffix:
                         key = '_'.join([eval_view, suffix])
                     else:
@@ -104,15 +109,27 @@ def classic_bias_eval():
                     shape_decisions[key] = shape_decision
                     texture_decisions[key] = texture_decision
                     total_decisions[key] = total_decision
+                    image_shape_decisions[key] = image_shape_decision
+                    image_texture_decisions[key] = image_texture_decision
+                    image_neither_decisions[key] = image_neither_decision
 
             # save results
             result = {'content_accuracies': content_accuracies,
                       'shape_decisions': shape_decisions,
                       'texture_decisions': texture_decisions,
                       'total_decisions': total_decisions}
+
+            decision_filter = {
+                'isd': image_shape_decisions,
+                'itd': image_texture_decisions,
+                'ind': image_neither_decisions,
+            }
             save_path = os.path.join(log_dir, model_name, 'shape_bias.pkl')
             with open(save_path, 'wb') as f:
                 pickle.dump(result, f)
+            filter_save_path = os.path.join(log_dir, model_name, 'decision_filter.pkl')
+            with open(filter_save_path, 'wb') as f:
+                pickle.dump(decision_filter, f)
 
 
 if __name__ == '__main__':
