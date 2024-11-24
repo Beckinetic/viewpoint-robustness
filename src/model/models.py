@@ -10,8 +10,8 @@ def get_model(model_name, pretrained=True, **kwargs):
         weights = models.AlexNet_Weights.DEFAULT if pretrained else None
         transforms = models.AlexNet_Weights.DEFAULT.transforms
         model = models.alexnet(weights=weights, **kwargs)
-        num_ftrs = model.fc.in_features
-        model.fc = nn.Linear(num_ftrs, kwargs.get('num_classes', 32))
+        num_ftrs = model.classifier[6].in_features
+        model.classifier[6] = nn.Linear(num_ftrs, kwargs.get('num_classes', 32))
     elif model_name == 'resnet18':
         weights = models.ResNet18_Weights.DEFAULT if pretrained else None
         transforms = models.ResNet18_Weights.DEFAULT.transforms

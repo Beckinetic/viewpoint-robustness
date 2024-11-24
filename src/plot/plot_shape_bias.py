@@ -73,6 +73,7 @@ def get_decision_proportion_and_shape_bias(shape_decisions, texture_decisions, a
     texture_decision_proportion = texture_decision_count / all_decisions_count
     shape_bias = np.sqrt(shape_decision_count / shape_and_texture_decision_count) * np.sqrt(
         shape_decision_count / all_decisions_count)  # accuracy corrected shape bias
+    # shape_bias = np.sqrt(shape_decision_count / shape_and_texture_decision_count)
 
     return shape_and_texture_decision_proportion, shape_decision_proportion, texture_decision_proportion, shape_bias
 
@@ -93,6 +94,7 @@ def get_standard_errors(shape_decisions, texture_decisions, all_decisions):
         if total_decisions > 0:
             shape_bias_by_category[category].append(np.sqrt(shape_decisions[category] / total_decisions) * np.sqrt(
                 shape_decisions[category] / all_decisions[category]))
+            # shape_bias_by_category[category].append(np.sqrt(shape_decisions[category] / total_decisions))
         else:
             shape_bias_by_category[category].append(0)
     shape_bias_se = np.std(np.array(list(shape_bias_by_category.values()))) / np.sqrt(
@@ -102,23 +104,23 @@ def get_standard_errors(shape_decisions, texture_decisions, all_decisions):
 
 def plot_shape_bias(suffix):
     # plot for the decision proportions and shape bias (Figure 2)
-    fig, axes = plt.subplots(2, 2, figsize=(14, 7))
+    fig, axes = plt.subplots(2, 2, figsize=(7, 7))
     ax1, ax2, ax5, ax6 = axes.flatten()
-    fig.subplots_adjust(left=0.1, right=0.8, wspace=0.2)
+    fig.subplots_adjust(wspace=0.4)
     width_factor_decisions = 0.9
     width_factor_shape_bias = 0.8
-
-    def make_narrower(ax, width_factor):
-        pos = ax.get_position()  # Get the original position
-        ax.set_position([pos.x0, pos.y0, pos.width * width_factor, pos.height])
-
-    # apply the narrower width to
-    make_narrower(ax2, width_factor_shape_bias)
-    # make_narrower(ax4, width_factor_shape_bias)
-    make_narrower(ax6, width_factor_shape_bias)
-    make_narrower(ax1, width_factor_decisions)
-    # make_narrower(ax3, width_factor_decisions)
-    make_narrower(ax5, width_factor_decisions)
+    #
+    # def make_narrower(ax, width_factor):
+    #     pos = ax.get_position()  # Get the original position
+    #     ax.set_position([pos.x0, pos.y0, pos.width * width_factor, pos.height])
+    #
+    # # apply the narrower width to
+    # make_narrower(ax2, width_factor_shape_bias)
+    # # make_narrower(ax4, width_factor_shape_bias)
+    # make_narrower(ax6, width_factor_shape_bias)
+    # make_narrower(ax1, width_factor_decisions)
+    # # make_narrower(ax3, width_factor_decisions)
+    # make_narrower(ax5, width_factor_decisions)
 
     # plot shape bias on viewpoint matched datasets
     for ind_background, background in enumerate(backgrounds):
@@ -314,8 +316,8 @@ def plot_shape_bias(suffix):
     ax6.title.set_text('OOD Viewpoint Data')
 
     # set common labels
-    fig.text(0.05, 0.5, 'Decision Proportion', va='center', rotation='vertical', fontsize=12)
-    fig.text(0.435, 0.5, 'Shape Bias', va='center', rotation='vertical', fontsize=12)
+    fig.text(0.03, 0.5, 'Decision Proportion', va='center', rotation='vertical', fontsize=12)
+    fig.text(0.49, 0.5, 'Shape Bias', va='center', rotation='vertical', fontsize=12)
 
     # set ticks for decisions
     ax5.set_xticks(np.arange(len(backgrounds) * len(views)))
@@ -326,7 +328,7 @@ def plot_shape_bias(suffix):
     # create color legend
     color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
                     for color in palette_shape_bias.values()]
-    ax6.legend(color_legend, shape_bias_metric, loc=(1.1, 0))
+    ax6.legend(color_legend, shape_bias_metric, loc=(-1.5, 2.35), ncols=3)
 
     # save the plot
     save_path = os.path.join(plot_dir, 'shape_bias.png')

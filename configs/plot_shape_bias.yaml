@@ -1,9 +1,9 @@
 log:
   view:
-    - f
-    - r
-    - er
     - fx
+    - er
+    - r
+    - f
   background:
     - combined
   res: combined
@@ -14,7 +14,7 @@ log:
       - er
       - fx
       - cr
-    ood_view: fx
+    ood_view: cr
     suffix:
 
 model:
@@ -45,10 +45,10 @@ plot:
     texture_proportion: "#F28522"
     shape_bias: "#089099"
   view:
-    - "Full view"
-    - "Restricted view"
-    - "Extra R. view"
     - "Fixed view"
+    - "Extra R. view"
+    - "Restricted view"
+    - "Full view"
   shape_bias_metric:
 #    - "Shape and Texture Decision Ratio"
     - "Shape Decision Proportion"

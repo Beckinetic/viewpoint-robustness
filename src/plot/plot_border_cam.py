@@ -47,6 +47,8 @@ def plot_border_cam():
     for eval_type in eval_types:
         fig, axes = plt.subplots(2, 3, figsize=(12, 7))
         fig.subplots_adjust(left=0.1, right=0.85, wspace=0.3)
+        df_matched_all = pd.DataFrame()
+        df_ood_all = pd.DataFrame()
 
         for ind_cam, cam_type in enumerate(cam_types):
             data_matched = []
@@ -100,6 +102,8 @@ def plot_border_cam():
             df_matched['Value'].fillna(df_matched['Value'].mean(), inplace=True)
             df_non_matched['Value'].fillna(df_non_matched['Value'].mean(), inplace=True)
             df_ood['Value'].fillna(df_ood['Value'].mean(), inplace=True)
+            df_matched_all = pd.concat([df_matched_all, df_matched])
+            df_ood_all = pd.concat([df_ood_all, df_ood])
 
             # Inside the plot_border_cam function
             pairs = [(views[i], views[j]) for i in range(len(views))
@@ -151,6 +155,15 @@ def plot_border_cam():
         save_path = os.path.join(plot_dir, '.'.join([eval_type, 'png']))
         plt.savefig(save_path)
         plt.close(fig)
+
+        # Save plot data
+        plot_data = {
+            'df_matched': df_matched_all,
+            'df_ood': df_ood_all
+        }
+        plot_data_save_path = os.path.join(plot_dir, '_'.join([eval_type, 'plot_data.pkl']))
+        with open(plot_data_save_path, 'wb') as f:
+            pickle.dump(plot_data, f)
 
 
 if __name__ == '__main__':

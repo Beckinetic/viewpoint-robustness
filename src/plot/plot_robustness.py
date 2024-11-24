@@ -58,8 +58,8 @@ max_severity = config['plot']['max_severity']
 
 def plot_robustness():
     # plot for the accuracy on distorted pictures (Figure 2)
-    fig, (ax1, ax3) = plt.subplots(1, 2, figsize=(12, 6))
-    fig.subplots_adjust(left=0.1, right=0.8, wspace=0.3)
+    fig, (ax1, ax3) = plt.subplots(1, 2, figsize=(8, 5))
+    fig.subplots_adjust(wspace=0.2)
 
     # plot for robustness on the distorted images of the matched view
     for ind_background, background in enumerate(backgrounds):
@@ -90,7 +90,7 @@ def plot_robustness():
             ax1.set_xticks(severities)
             ax1.set_ylim(acc_min, acc_max)
             ax1.title.set_text('In-distribution Viewpoint Data')
-            ax1.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+            # ax1.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
 
     # for ind_background, background in enumerate(backgrounds):
     #     for ind_view, view in enumerate(views):
@@ -156,11 +156,11 @@ def plot_robustness():
             ax3.set_xticks(severities)
             ax3.set_ylim(acc_min, acc_max)
             ax3.title.set_text('OOD Viewpoint Data')
-            ax3.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+            # ax3.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
 
             color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
                             for color in palette.values()]
-            ax3.legend(color_legend, view_plot_name, loc=(1.1, 0))
+            ax3.legend(color_legend, view_plot_name, loc=(-1.15, 1.08), ncols=4)
 
     # save the plot
     save_path = os.path.join(plot_dir, 'robustness.png')

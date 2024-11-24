@@ -90,12 +90,33 @@ def plot_train_acc_loss():
 def plot_val_acc_loss():
     # plot validation accuracy and loss
     # set plotting canvas
-    fig, (ax1, ax3) = plt.subplots(1, 2, figsize=(14, 7))
-    fig.subplots_adjust(left=0.1, right=0.8, wspace=0.2)
+    fig, (ax0, ax1, ax3) = plt.subplots(1, 3, figsize=(14, 5))
+    fig.subplots_adjust(top=0.85)
 
     # plot the validation accuracy and loss on the same view images (Figure 1-B)
     for background in backgrounds:
         for ind_view, view in enumerate(views):
+            # get training results of current model
+            log_folder = '_'.join([background, view, res])
+            result_path = os.path.join(log_dir, log_folder, '_'.join([model_name, 'log', 'data.pkl']))
+            with open(result_path, 'rb') as f:
+                result = pickle.load(f)
+            train_loss = result['tl']
+            train_acc = result['ta']
+
+            # cut data by max epoch
+            train_loss = train_loss[0:max_epoch]
+            train_acc = train_acc[0:max_epoch]
+
+            # plot accuracy
+            ax0.plot(epochs, train_acc, color=palette[view])
+            ax0.set_xlabel('Epoch')
+            ax0.set_ylabel('Accuracy (%)')
+            ax0.set_ylim([acc_min, acc_max])
+            ax0.set_title("Training Accuracy")
+
+            # ax0.grid(visible=True, linestyle='--', linewidth=1, color='gray', alpha=0.6)
+
             # get validation results of current model
             log_folder = '_'.join([background, view, res])
             result_path = os.path.join(log_dir, log_folder, '_'.join([model_name, 'log', 'data.pkl']))
@@ -111,12 +132,12 @@ def plot_val_acc_loss():
             # plot accuracy
             ax1.plot(epochs, validation_acc, color=palette[view], linewidth=2)
             ax1.set_xlabel('Epoch')
-            ax1.set_ylabel('Accuracy (%)')
+            ax1.set_yticks([])
             ax1.set_ylim([acc_min, acc_max])
             ax1.set_title("Test Accuracy on In-distribution Viewpoint Data")
 
             # global plot settings
-            ax1.grid(visible=True, linestyle='--', linewidth=1, color='gray', alpha=0.6)
+            # ax1.grid(visible=True, linestyle='--', linewidth=1, color='gray', alpha=0.6)
 
     # # plot the accuracy and loss when validated on non-matched view images
     # for background in backgrounds:
@@ -168,13 +189,13 @@ def plot_val_acc_loss():
                 ax3.set_yticks([])
                 ax3.set_title("Testing Accuracy on OOD Viewpoint Data")
 
-                # global plot settings
-                ax3.grid(visible=True, linestyle='--', linewidth=1, color='gray', alpha=0.6)
+            # global plot settings
+            # ax3.grid(visible=True, linestyle='--', linewidth=1, color='gray', alpha=0.6)
 
-                # create color legend
-                color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
-                                for color in colors]
-                ax3.legend(color_legend, view_plot_name, loc=(1.1, 0.15))
+            # create color legend
+            color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
+                            for color in colors]
+            ax1.legend(color_legend, view_plot_name, loc=(-0.45, 1.1), ncols=4)
 
     # save the plot
     save_path = os.path.join(plot_dir, 'validation_acc_loss.png')
