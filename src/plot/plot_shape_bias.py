@@ -71,9 +71,9 @@ def get_decision_proportion_and_shape_bias(shape_decisions, texture_decisions, a
     shape_and_texture_decision_proportion = shape_and_texture_decision_count / all_decisions_count
     shape_decision_proportion = shape_decision_count / all_decisions_count
     texture_decision_proportion = texture_decision_count / all_decisions_count
-    shape_bias = np.sqrt(shape_decision_count / shape_and_texture_decision_count) * np.sqrt(
-        shape_decision_count / all_decisions_count)  # accuracy corrected shape bias
-    # shape_bias = np.sqrt(shape_decision_count / shape_and_texture_decision_count)
+    # shape_bias = np.sqrt(shape_decision_count / shape_and_texture_decision_count) * np.sqrt(
+    #     shape_decision_count / all_decisions_count)  # accuracy corrected shape bias
+    shape_bias = shape_decision_count / shape_and_texture_decision_count
 
     return shape_and_texture_decision_proportion, shape_decision_proportion, texture_decision_proportion, shape_bias
 
@@ -109,18 +109,6 @@ def plot_shape_bias(suffix):
     fig.subplots_adjust(wspace=0.4)
     width_factor_decisions = 0.9
     width_factor_shape_bias = 0.8
-    #
-    # def make_narrower(ax, width_factor):
-    #     pos = ax.get_position()  # Get the original position
-    #     ax.set_position([pos.x0, pos.y0, pos.width * width_factor, pos.height])
-    #
-    # # apply the narrower width to
-    # make_narrower(ax2, width_factor_shape_bias)
-    # # make_narrower(ax4, width_factor_shape_bias)
-    # make_narrower(ax6, width_factor_shape_bias)
-    # make_narrower(ax1, width_factor_decisions)
-    # # make_narrower(ax3, width_factor_decisions)
-    # make_narrower(ax5, width_factor_decisions)
 
     # plot shape bias on viewpoint matched datasets
     for ind_background, background in enumerate(backgrounds):
@@ -145,6 +133,7 @@ def plot_shape_bias(suffix):
             shape_and_texture_decisions_se, shape_decisions_se, texture_decisions_se, shape_bias_se = (
                 get_standard_errors(shape_decisions, texture_decisions, all_decisions))
 
+            print(f"Shape bias of {view} (ID): {shape_bias}")
             # plot the decision proportions and shape bias
             # set up bar width and positions
             bar_width = 0.2
@@ -180,88 +169,6 @@ def plot_shape_bias(suffix):
     ax1.title.set_text('In-distribution Viewpoint Data')
     ax2.title.set_text('In-distribution Viewpoint Data')
 
-    # # plot mean shape bias on viewpoint non-matched datasets
-    # for ind_background, background in enumerate(backgrounds):
-    #     for ind_view, view in enumerate(views):
-    #         # get cue-conflict results for current model
-    #         result_file_name = 'shape_bias.pkl'
-    #         log_folder = '_'.join([background, view, res])
-    #         result_path = os.path.join(log_dir, log_folder, result_file_name)
-    #         with open(result_path, 'rb') as file:
-    #             results = pickle.load(file)
-    #
-    #         # get cue-conflict dataset of non-matched-view
-    #         shape_and_texture_decision_proportions = []
-    #         shape_decision_proportions = []
-    #         texture_decision_proportions = []
-    #         shape_biases = []
-    #         other_views = [item for item in views if item != view]
-    #         shape_decisions_merged = {label: 0 for label in category_labels.keys()}
-    #         texture_decisions_merged = {label: 0 for label in category_labels.keys()}
-    #         all_decisions_merged = {label: 0 for label in category_labels.keys()}
-    #         for other_view in other_views:
-    #             if suffix:
-    #                 key = '_'.join([other_view, suffix])
-    #             else:
-    #                 key = other_view
-    #             content_accuracy = results['content_accuracies'][key]
-    #             shape_decisions = results['shape_decisions'][key]
-    #             texture_decisions = results['texture_decisions'][key]
-    #             all_decisions = results['total_decisions'][key]
-    #             shape_decisions_merged = {key: shape_decisions_merged[key] + shape_decisions[key]
-    #                                       for key in shape_decisions_merged}
-    #             texture_decisions_merged = {key: texture_decisions_merged[key] + texture_decisions[key]
-    #                                         for key in texture_decisions_merged}
-    #             all_decisions_merged = {key: all_decisions_merged[key] + all_decisions[key]
-    #                                     for key in all_decisions_merged}
-    #             (shape_and_texture_decision_proportion, shape_decision_proportion, texture_decision_proportion,
-    #              shape_bias) = get_decision_proportion_and_shape_bias(shape_decisions, texture_decisions, all_decisions)
-    #             shape_and_texture_decision_proportions.append(shape_and_texture_decision_proportion)
-    #             shape_decision_proportions.append(shape_decision_proportion)
-    #             texture_decision_proportions.append(texture_decision_proportion)
-    #             shape_biases.append(shape_bias)
-    #         shape_and_texture_decision_proportion = np.mean(shape_and_texture_decision_proportions, axis=0)
-    #         shape_decision_proportion = np.mean(shape_decision_proportions, axis=0)
-    #         texture_decision_proportion = np.mean(texture_decision_proportions, axis=0)
-    #         shape_bias = np.mean(shape_biases, axis=0)
-    #         shape_and_texture_decisions_se, shape_decisions_se, texture_decisions_se, shape_bias_se = (
-    #             get_standard_errors(shape_decisions_merged, texture_decisions_merged, all_decisions_merged))
-    #
-    #         # plot the decision proportions and shape bias
-    #         # set up bar width and positions
-    #         bar_width = 0.2
-    #
-    #         # set a flattened index
-    #         ind_flattened = ind_background * len(view) + ind_view
-    #
-    #         # Plot bars for texture/shape decision proportions on primary y-axis
-    #         ax3.bar(ind_flattened - 0.5 * bar_width * (1 / width_factor_decisions), shape_decision_proportion,
-    #                 yerr=shape_decisions_se,
-    #                 width=bar_width,
-    #                 label='Texture Decision Proportion',
-    #                 color=palette_shape_bias['shape_proportion'],
-    #                 zorder=1)
-    #         ax3.bar(ind_flattened + 0.5 * bar_width * (1 / width_factor_decisions), texture_decision_proportion,
-    #                 yerr=texture_decisions_se,
-    #                 width=bar_width,
-    #                 label='Shape Decision Proportion',
-    #                 color=palette_shape_bias['texture_proportion'],
-    #                 zorder=1)
-    #
-    #         ax4.bar(ind_flattened, shape_bias, width=bar_width * (1 / width_factor_shape_bias), yerr=shape_bias_se,
-    #                 label='Shape Bias', color=palette_shape_bias['shape_bias'], zorder=1)
-    #
-    # # ax3 and ax4 settings
-    # # ax3.set_ylabel('Decision Proportion')
-    # ax3.set_ylim([decision_proportion_min, decision_proportion_max])
-    # ax3.set_xticks([])
-    # ax3.set_xticklabels([])
-    # # ax4.set_ylabel('Shape Bias')
-    # ax4.set_ylim([shape_bias_min, shape_bias_max])
-    # ax4.set_xticks([])
-    # ax4.set_xticklabels([])
-    # ax3.title.set_text('Viewpoint Non-Matched')
-
     # plot shape bias on viewpoint o.o.d. dataset
     for ind_background, background in enumerate(backgrounds):
         for ind_view, view in enumerate(views):
@@ -285,6 +192,7 @@ def plot_shape_bias(suffix):
             shape_and_texture_decisions_se, shape_decisions_se, texture_decisions_se, shape_bias_se = (
                 get_standard_errors(shape_decisions, texture_decisions, all_decisions))
 
+            print(f"Shape bias of {view} (OOD): {shape_bias}")
             # plot the decision proportions and shape bias
             # set up bar width and positions
             bar_width = 0.2
@@ -316,7 +224,7 @@ def plot_shape_bias(suffix):
     ax6.title.set_text('OOD Viewpoint Data')
 
     # set common labels
-    fig.text(0.03, 0.5, 'Decision Proportion', va='center', rotation='vertical', fontsize=12)
+    fig.text(0.03, 0.5, 'Shape and Texture Decision Proportions', va='center', rotation='vertical', fontsize=12)
     fig.text(0.49, 0.5, 'Shape Bias', va='center', rotation='vertical', fontsize=12)
 
     # set ticks for decisions
@@ -324,6 +232,10 @@ def plot_shape_bias(suffix):
     ax5.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
     ax6.set_xticks(np.arange(len(backgrounds) * len(views)))
     ax6.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
+    # ax1.set_xticks(np.arange(len(backgrounds) * len(views)))
+    # ax1.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
+    # ax2.set_xticks(np.arange(len(backgrounds) * len(views)))
+    # ax2.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
 
     # create color legend
     color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)

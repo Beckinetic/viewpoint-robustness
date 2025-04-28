@@ -33,7 +33,7 @@ plot:
   decision_proportion_min: 0
   decision_proportion_max: 0.26
   shape_bias_min: 0
-  shape_bias_max: 0.35
+  shape_bias_max: 1
   palette:
     f : "#FF1F5B"
     r: "#00CD6C"

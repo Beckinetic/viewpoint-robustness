@@ -1,9 +1,9 @@
 log:
   view:
-    - f
-    - r
-    - er
     - fx
+    - er
+    - r
+    - f
   test_view:
     - cr
   background:
@@ -24,15 +24,19 @@ plot:
   acc_change_min: -80
   acc_change_max: 5
   palette:
-    f : "#FF1F5B"
-    r: "#00CD6C"
-    er: "#AF58BA"
     fx: "#009ADE"
+    er: "#AF58BA"
+    r: "#00CD6C"
+    f : "#FF1F5B"
   view:
-    - "Full view"
-    - "Restricted view"
-    - "Extra R. view"
+#    - "Fixed"
+#    - "Extra R."
+#    - "Restricted"
+#    - "Full"
     - "Fixed view"
+    - "Extra Restricted view"
+    - "Restricted view"
+    - "Full view"
 
 
 

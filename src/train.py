@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import pickle
@@ -61,6 +60,8 @@ gamma = config['scheduler']['gamma']
 
 def prepare_data(data_folder):
     data_path = os.path.join(data_dir, data_folder)
+
+    # ImageNet data transformation
     transform = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
@@ -77,7 +78,7 @@ def prepare_data(data_folder):
 
 
 def train(data_folder, train_dataset, val_datasets):
-    # prepare data
+    # Prepare data
     train_dataloader = DataLoader(train_dataset, batch_size=train_batch_size, shuffle=True)
     val_dataloaders = {}
     for val_ind, key in enumerate(val_datasets):
@@ -106,7 +107,11 @@ def train(data_folder, train_dataset, val_datasets):
     scheduler = get_scheduler(scheduler_name, optimizer, step_size=step_size, gamma=gamma)
 
     # save untrained model as baseline
-    untrained_model_path = f"{model_dir}/{data_folder}/{backbone}_epoch_0.pth"
+    if pretrained:
+        is_pretrained = 'pretrained'
+    else:
+        is_pretrained = 'scratch'
+    untrained_model_path = f"{model_dir}/{data_folder}/{backbone}_{is_pretrained}_epoch_0.pth"
     os.makedirs(os.path.dirname(untrained_model_path), exist_ok=True)
     torch.save(model.state_dict(), untrained_model_path)
 
@@ -169,12 +174,12 @@ def train(data_folder, train_dataset, val_datasets):
 
         # save checkpoints
         if (epoch + 1) % checkpoint == 0:
-            checkpoint_path = f"{model_dir}/{data_folder}/{backbone}_epoch_{epoch + 1}.pth"
+            checkpoint_path = f"{model_dir}/{data_folder}/{backbone}_{is_pretrained}_epoch_{epoch + 1}.pth"
             os.makedirs(os.path.dirname(checkpoint_path), exist_ok=True)
             torch.save(model.state_dict(), checkpoint_path)
 
         # save logs
-        log_path = f"{log_dir}/{data_folder}/loss_acc_log/{backbone}_log_epoch_{epoch + 1}.txt"
+        log_path = f"{log_dir}/{data_folder}/loss_acc_log/{backbone}_{is_pretrained}_log_epoch_{epoch + 1}.txt"
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
         with open(log_path, 'w') as log_file:
             log_file.write(f"Epoch {epoch + 1}, Train Loss: {train_loss}\n")
@@ -182,6 +187,13 @@ def train(data_folder, train_dataset, val_datasets):
             for val_ind, key in enumerate(val_dataloaders):
                 log_file.write(f"Epoch {epoch + 1}, Validation {val_ind} Loss: {val_losses[key][epoch]}\n")
                 log_file.write(f"Epoch {epoch + 1}, Validation {val_ind} Accuracy: {val_accs[key][epoch]}\n")
+
+        # print log
+        logging.info(f"Epoch {epoch + 1}, Train Loss: {train_loss}\n")
+        logging.info(f"Epoch {epoch + 1}, Train Accuracy: {100 * train_correct / total}\n")
+        for val_ind, key in enumerate(val_dataloaders):
+            logging.info(f"Epoch {epoch + 1}, Validation {val_ind} Loss: {val_losses[key][epoch]}\n")
+            logging.info(f"Epoch {epoch + 1}, Validation {val_ind} Accuracy: {val_accs[key][epoch]}\n")
 
     # save congregated loss and acc data
     log_data_dict = {

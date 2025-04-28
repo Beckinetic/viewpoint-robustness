@@ -1,6 +1,6 @@
 data:
   train:
-    batch_size: 32
+    batch_size: 512
     num_classes: 32
     view:
       - f
@@ -15,7 +15,7 @@ data:
       - desert
       - industrial
   validation:
-    batch_size: 32
+    batch_size: 512
     num_classes: 32
     view:
       - f

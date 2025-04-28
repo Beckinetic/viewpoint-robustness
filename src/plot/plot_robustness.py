@@ -58,7 +58,7 @@ max_severity = config['plot']['max_severity']
 
 def plot_robustness():
     # plot for the accuracy on distorted pictures (Figure 2)
-    fig, (ax1, ax3) = plt.subplots(1, 2, figsize=(8, 5))
+    fig, (ax1, ax3) = plt.subplots(1, 2, figsize=(8, 4))
     fig.subplots_adjust(wspace=0.2)
 
     # plot for robustness on the distorted images of the matched view
@@ -78,7 +78,9 @@ def plot_robustness():
             for ind_distortion, distortion_type in enumerate(distortion_types):
                 accuracy[ind_distortion, 0] = content_acc[view]
                 accuracy[ind_distortion, 1: max_severity + 1] = list(distortion_acc[view][distortion_type].values())
+                # accuracy[ind_distortion, :] = accuracy[ind_distortion, :] / content_acc[view] * 100
             mean_accuracy = np.mean(accuracy, axis=0)
+            print(f"mean_accuracy (ID) of {view}: {mean_accuracy}")
             se_accuracy = np.std(accuracy, axis=0, ddof=1) / np.sqrt(accuracy.shape[0])
 
             severities = range(0, max_severity + 1)
@@ -86,10 +88,11 @@ def plot_robustness():
             ax1.fill_between(severities, mean_accuracy - se_accuracy, mean_accuracy + se_accuracy,
                              color=palette[view], alpha=0.2)
             ax1.set_xlabel('Severity')
-            ax1.set_ylabel('Accuracy (%)')
+            ax1.set_ylabel('Accuracy (%)\nCorrupted Images', fontsize=12)
+            ax1.spines[['top', 'right']].set_visible(False)
             ax1.set_xticks(severities)
             ax1.set_ylim(acc_min, acc_max)
-            ax1.title.set_text('In-distribution Viewpoint Data')
+            ax1.title.set_text('ID Viewpoints')
             # ax1.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
 
     # for ind_background, background in enumerate(backgrounds):
@@ -143,9 +146,11 @@ def plot_robustness():
                     accuracy[ind_distortion, 0, ind_ood_view] = content_acc[ood_view]
                     accuracy[ind_distortion, 1: max_severity + 1, ind_ood_view] = list(distortion_acc[ood_view]
                                                                                          [distortion_type].values())
+                    # accuracy[ind_distortion, :] = accuracy[ind_distortion, :] / content_acc[ood_view] * 100
 
             accuracy = np.mean(accuracy, axis=2)  # average results on non-matched views
             mean_accuracy = np.mean(accuracy, axis=0)
+            print(f"mean_accuracy (OOD) of {view}: {mean_accuracy}")
             se_accuracy = np.std(accuracy, axis=0, ddof=1) / np.sqrt(accuracy.shape[0])
 
             severities = range(0, max_severity + 1)
@@ -154,8 +159,10 @@ def plot_robustness():
                              color=palette[view], alpha=0.2)
             ax3.set_xlabel('Severity')
             ax3.set_xticks(severities)
+            ax3.set_yticklabels([])
             ax3.set_ylim(acc_min, acc_max)
-            ax3.title.set_text('OOD Viewpoint Data')
+            ax3.title.set_text('OOD Viewpoints')
+            ax3.spines[['top', 'right']].set_visible(False)
             # ax3.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
 
             color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
