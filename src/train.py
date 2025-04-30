@@ -115,6 +115,11 @@ def train(data_folder, train_dataset, val_datasets):
     os.makedirs(os.path.dirname(untrained_model_path), exist_ok=True)
     torch.save(model.state_dict(), untrained_model_path)
 
+    # Early stopping parameters
+    # best_val_loss = float('inf')
+    # patience = 5
+    # trigger_times = 0
+
     # training Loop
     # initialise losses and accuracies
     train_losses = []
@@ -171,6 +176,18 @@ def train(data_folder, train_dataset, val_datasets):
 
         # run scheduler
         scheduler.step()
+
+        # Early stopping logic
+        # current_val_loss = sum([val_losses[key][-1] for key in val_losses]) / len(val_losses)
+        # if current_val_loss < best_val_loss:
+        #     best_val_loss = current_val_loss
+        #     trigger_times = 0
+        # else:
+        #     trigger_times += 1
+        #     if trigger_times >= patience:
+        #         print(f"Early stopping triggered after {epoch + 1} epochs.")
+        #         # Optionally, save the best model checkpoint here if needed.
+        #         break
 
         # save checkpoints
         if (epoch + 1) % checkpoint == 0:
