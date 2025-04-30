@@ -32,7 +32,7 @@ data:
 
 model:
   backbone: resnet18
-  pretrained: false
+  pretrained: true
   epochs: 30
   checkpoint: 1
 
