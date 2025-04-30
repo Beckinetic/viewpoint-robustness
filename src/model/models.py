@@ -12,24 +12,29 @@ def get_model(model_name, pretrained=True, **kwargs):
         model = models.alexnet(weights=weights, **kwargs)
         num_ftrs = model.classifier[6].in_features
         model.classifier[6] = nn.Linear(num_ftrs, kwargs.get('num_classes', 32))
+
     elif model_name == 'resnet18':
         weights = models.ResNet18_Weights.DEFAULT if pretrained else None
         transforms = models.ResNet18_Weights.DEFAULT.transforms
-        model = models.resnet18(weights=weights, **kwargs)
+        num_classes = kwargs.pop('num_classes', 32)
+        model = models.resnet18(weights=weights)
         num_ftrs = model.fc.in_features
-        model.fc = nn.Linear(num_ftrs, kwargs.get('num_classes', 32))
+        model.fc = nn.Linear(num_ftrs, num_classes)
+
     elif model_name == 'resnet34':
         weights = models.ResNet34_Weights.DEFAULT if pretrained else None
         transforms = models.ResNet34_Weights.DEFAULT.transforms
         model = models.resnet34(weights=weights, **kwargs)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, kwargs.get('num_classes', 32))
+
     elif model_name == 'resnet50':
         weights = models.ResNet50_Weights.DEFAULT if pretrained else None
         transforms = models.ResNet50_Weights.DEFAULT.transforms
         model = models.resnet50(weights=weights, **kwargs)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, kwargs.get('num_classes', 32))
+
     else:
         raise ValueError(f"Model {model_name} is not supported.")
 
