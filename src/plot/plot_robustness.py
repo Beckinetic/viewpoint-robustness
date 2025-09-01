@@ -93,40 +93,6 @@ def plot_robustness():
             ax1.set_xticks(severities)
             ax1.set_ylim(acc_min, acc_max)
             ax1.title.set_text('ID Viewpoints')
-            # ax1.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
-
-    # for ind_background, background in enumerate(backgrounds):
-    #     for ind_view, view in enumerate(views):
-    #         log_folder = '_'.join([background, view, res])
-    #         other_views = [item for item in views if item != view]
-    #         accuracy = np.zeros((len(distortion_types), max_severity + 1, len(other_views)))
-    #         for ind_ood_view, other_view in enumerate(other_views):
-    #             # load result
-    #             result_path = os.path.join(log_dir, log_folder, 'robustness.pkl')
-    #             with open(result_path, 'rb') as f:
-    #                 result = pickle.load(f)
-    #             content_acc = result['ca']
-    #             distortion_acc = result['da']
-    #
-    #             # obtain mean accuracy and standard error
-    #             for ind_distortion, distortion_type in enumerate(distortion_types):
-    #                 accuracy[ind_distortion, 0, ind_ood_view] = content_acc[other_view]
-    #                 accuracy[ind_distortion, 1: max_severity + 1, ind_ood_view] = list(distortion_acc[other_view]
-    #                                                                                      [distortion_type].values())
-    #
-    #         accuracy = np.mean(accuracy, axis=2)  # average results on non-matched views
-    #         mean_accuracy = np.mean(accuracy, axis=0)
-    #         se_accuracy = np.std(accuracy, axis=0, ddof=1) / np.sqrt(accuracy.shape[0])
-    #
-    #         severities = range(0, max_severity + 1)
-    #         ax2.plot(severities, mean_accuracy, color=palette[view], label=view_plot_name[ind_view])
-    #         ax2.fill_between(severities, mean_accuracy - se_accuracy, mean_accuracy + se_accuracy,
-    #                          color=palette[view], alpha=0.2)
-    #         ax2.set_xlabel('Severity')
-    #         ax2.set_xticks(severities)
-    #         ax2.set_ylim(acc_min, acc_max)
-    #         ax2.title.set_text('Viewpoint Non-Matched')
-    #         ax2.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
 
     for ind_background, background in enumerate(backgrounds):
         for ind_view, view in enumerate(views):
@@ -146,7 +112,6 @@ def plot_robustness():
                     accuracy[ind_distortion, 0, ind_ood_view] = content_acc[ood_view]
                     accuracy[ind_distortion, 1: max_severity + 1, ind_ood_view] = list(distortion_acc[ood_view]
                                                                                          [distortion_type].values())
-                    # accuracy[ind_distortion, :] = accuracy[ind_distortion, :] / content_acc[ood_view] * 100
 
             accuracy = np.mean(accuracy, axis=2)  # average results on non-matched views
             mean_accuracy = np.mean(accuracy, axis=0)
@@ -163,15 +128,16 @@ def plot_robustness():
             ax3.set_ylim(acc_min, acc_max)
             ax3.title.set_text('OOD Viewpoints')
             ax3.spines[['top', 'right']].set_visible(False)
-            # ax3.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
 
             color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
                             for color in palette.values()]
             ax3.legend(color_legend, view_plot_name, loc=(-1.15, 1.08), ncols=4)
 
+    ax1.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    ax3.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
     # save the plot
-    save_path = os.path.join(plot_dir, 'robustness.png')
-    plt.savefig(save_path)
+    save_path = os.path.join(plot_dir, f'{model_name}_robustness.svg')
+    plt.savefig(save_path, format='svg')
     plt.close(fig)
 
 

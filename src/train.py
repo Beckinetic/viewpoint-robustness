@@ -82,7 +82,7 @@ def train(data_folder, train_dataset, val_datasets):
     train_dataloader = DataLoader(train_dataset, batch_size=train_batch_size, shuffle=True)
     val_dataloaders = {}
     for val_ind, key in enumerate(val_datasets):
-        val_dataloader = DataLoader(val_datasets[key], batch_size=val_batch_size, shuffle=True)
+        val_dataloader = DataLoader(val_datasets[key], batch_size=val_batch_size, shuffle=False)
         val_dataloaders[key] = val_dataloader
     logging.info(f'Train dataset size: {len(train_dataset)}')
     logging.info(f'Val dataset number: {len(val_datasets)}')
@@ -114,11 +114,6 @@ def train(data_folder, train_dataset, val_datasets):
     untrained_model_path = f"{model_dir}/{data_folder}/{backbone}_{is_pretrained}_epoch_0.pth"
     os.makedirs(os.path.dirname(untrained_model_path), exist_ok=True)
     torch.save(model.state_dict(), untrained_model_path)
-
-    # Early stopping parameters
-    # best_val_loss = float('inf')
-    # patience = 5
-    # trigger_times = 0
 
     # training Loop
     # initialise losses and accuracies
@@ -219,7 +214,7 @@ def train(data_folder, train_dataset, val_datasets):
         'ta': train_accs,
         'va': val_accs
     }
-    log_data_dict_path = f"{log_dir}/{data_folder}/{backbone}_log_data.pkl"
+    log_data_dict_path = f"{log_dir}/{data_folder}/{backbone}_{is_pretrained}_log_data.pkl"
     with open(log_data_dict_path, 'wb') as f:
         pickle.dump(log_data_dict, f)
 

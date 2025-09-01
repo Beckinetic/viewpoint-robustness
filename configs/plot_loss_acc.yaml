@@ -11,7 +11,7 @@ log:
   res: combined
 
 model:
-  model_name: resnet18
+  model_name: resnet18_pretrained
   max_epoch: 30
 
 plot:

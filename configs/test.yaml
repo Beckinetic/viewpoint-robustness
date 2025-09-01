@@ -16,11 +16,12 @@ data:
       - industrial
 
 model:
-  backbone: resnet18
+  backbone: resnet18_pretrained
   to_test:
     view:
       - f
       - r
+      - er
       - fx
     res:
       - combined

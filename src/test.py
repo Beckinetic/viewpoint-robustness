@@ -101,7 +101,8 @@ def test():
                     test_accs[key] = []
 
                 # load the model backbone
-                model, _ = get_model(backbone, pretrained=False, num_classes=num_classes)
+                general_backbone_name = backbone.split('_')[0]
+                model, _ = get_model(general_backbone_name, pretrained=False, num_classes=num_classes)
                 model.to(device)
 
                 for epoch in tqdm(range(max_epoch + 1), desc=f'Model {view}'):

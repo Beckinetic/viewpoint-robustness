@@ -1,7 +1,6 @@
 import argparse
 import os
 import pickle
-import warnings
 
 import numpy as np
 import yaml
@@ -69,7 +68,6 @@ def plot_train_acc_loss():
             train_acc = train_acc[0:max_epoch]
             print(f"train_acc of {view}: {train_acc[max_epoch-1]}")
 
-
             # plot accuracy
             ax1.plot(epochs, train_acc, color=palette[view])
             ax1.set_xlabel('Epoch')
@@ -86,15 +84,15 @@ def plot_train_acc_loss():
             ax1.legend(color_legend, view_plot_name, loc=(1.06, 0.15))
 
     # save the plot
-    save_path = os.path.join(plot_dir, 'train_acc_loss.png')
-    plt.savefig(save_path)
+    save_path = os.path.join(plot_dir, f'{model_name}_train_acc_loss.svg')
+    plt.savefig(save_path, format='svg')
     plt.close(fig)
 
 
 def plot_val_acc_loss():
     # plot validation accuracy and loss
     # set plotting canvas
-    fig, (ax0, ax1, ax3) = plt.subplots(1, 3, figsize=(14, 4))
+    fig, (ax0, ax1, ax2, ax3) = plt.subplots(1, 4, figsize=(14, 4))
     fig.subplots_adjust(top=0.85)
 
     # plot the validation accuracy and loss on the same view images (Figure 1-B)
@@ -120,8 +118,6 @@ def plot_val_acc_loss():
             ax0.set_title("Training Accuracy")
             ax0.spines[['top', 'right']].set_visible(False)
 
-            # ax0.grid(visible=True, linestyle='--', linewidth=1, color='gray', alpha=0.6)
-
             # get validation results of current model
             log_folder = '_'.join([background, view, res])
             result_path = os.path.join(log_dir, log_folder, '_'.join([model_name, 'log', 'data.pkl']))
@@ -143,40 +139,7 @@ def plot_val_acc_loss():
             ax1.spines[['top', 'right']].set_visible(False)
             ax1.set_title("Test Accuracy on ID Viewpoints")
 
-            # global plot settings
-            # ax1.grid(visible=True, linestyle='--', linewidth=1, color='gray', alpha=0.6)
-
-    # # plot the accuracy and loss when validated on non-matched view images
-    # for background in backgrounds:
-    #     for ind_view, view in enumerate(views):
-    #         # get validation results of current model
-    #         log_folder = '_'.join([background, view, res])
-    #         result_path = os.path.join(log_dir, log_folder, '_'.join([model_name, 'log', 'data.pkl']))
-    #         with open(result_path, 'rb') as f:
-    #             result = pickle.load(f)
-    #         validation_loss = result['vl']
-    #         validation_acc = result['va']
-    #
-    #         other_views = [item for item in views if item != view]
-    #         validation_loss_other_view = []
-    #         validation_acc_other_view = []
-    #         for other_view in other_views:
-    #             validation_loss_other_view.append(np.array(validation_loss[other_view][0:max_epoch]))
-    #             validation_acc_other_view.append(np.array(validation_acc[other_view][0:max_epoch]))
-    #         mean_val_loss_other_view = np.mean(validation_loss_other_view, axis=0)
-    #         mean_val_acc_other_view = np.mean(validation_acc_other_view, axis=0)
-    #
-    #         # plot accuracy
-    #         ax2.plot(epochs, mean_val_acc_other_view, color=palette[view])
-    #         ax2.set_xlabel('Epoch')
-    #         # ax2.set_ylabel('Accuracy (%)')
-    #         ax2.set_ylim([acc_min, acc_max])
-    #         ax2.set_title("Mean Validation Accuracy on Viewpoint Non-matched Datasets")
-    #
-    #         # global plot settings
-    #         ax2.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
-
-    # plot the accuracy and loss when tested on viewpoint o.o.d. test set (except for full view dataset)
+    # plot the accuracy and loss when tested on viewpoint o.o.d. test set
     for background in backgrounds:
         for ind_view, view in enumerate(views):
             # get validation results of current model
@@ -191,32 +154,17 @@ def plot_val_acc_loss():
                 print(f"test_acc of {view}: {test_acc[max_epoch - 1]}")
 
                 # plot accuracy
-                ax3.plot(epochs, test_acc, color=palette[view], linewidth=2)
-                ax3.set_xlabel('Epoch')
-                ax3.set_ylim([acc_min, acc_max])
-                ax3.set_yticklabels([])
-                ax3.spines[['top', 'right']].set_visible(False)
-                ax3.set_title("Testing Accuracy on OOD Viewpoints")
-
-            # global plot settings
-            # ax3.grid(visible=True, linestyle='--', linewidth=1, color='gray', alpha=0.6)
+                ax2.plot(epochs, test_acc, color=palette[view], linewidth=2)
+                ax2.set_xlabel('Epoch')
+                ax2.set_ylim([acc_min, acc_max])
+                ax2.set_yticklabels([])
+                ax2.spines[['top', 'right']].set_visible(False)
+                ax2.set_title("Testing Accuracy on OOD Viewpoints")
 
             # create color legend
             color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
                             for color in colors]
             ax1.legend(color_legend, view_plot_name, loc=(-0.45, 1.1), ncols=4)
-
-    # save the plot
-    save_path = os.path.join(plot_dir, 'validation_acc_loss.png')
-    plt.savefig(save_path)
-    plt.close(fig)
-
-
-def plot_last_epoch_acc():
-    fig, (ax0, ax1, ax3) = plt.subplots(1, 3, figsize=(14, 4))  # slightly reduced height
-    fig.subplots_adjust(top=0.85)
-    fig.delaxes(ax1)  # Remove ax1
-    fig.delaxes(ax3)  # Remove ax2
 
     # plot the validation accuracy and loss on the same view images (Figure 1-B)
     val_accs = []
@@ -235,8 +183,8 @@ def plot_last_epoch_acc():
             validation_acc = result['va']
             test_acc = ood_result['tea']
 
-            last_epoch_validation_acc = validation_acc[view][max_epoch-1]
-            last_epoch_test_acc = test_acc[test_view][max_epoch-1]
+            last_epoch_validation_acc = validation_acc[view][max_epoch - 1]
+            last_epoch_test_acc = test_acc[test_view][max_epoch - 1]
             val_accs.append(last_epoch_validation_acc)
             test_accs.append(last_epoch_test_acc)
 
@@ -247,30 +195,95 @@ def plot_last_epoch_acc():
 
     # Plot bars
     for i, view in enumerate(views):
-        ax0.bar(x[i] - 0.01, val_accs[i], bar_width, label=f'Validation ({view_plot_name[i]})', color=palette[view])
-        ax0.bar(x[i] + bar_width + 0.01, test_accs[i], bar_width, label=f'Test ({view_plot_name[i]})', color=palette[view], hatch='//')
+        ax3.bar(x[i] - 0.01, val_accs[i], bar_width, label=f'Validation ({view_plot_name[i]})', color=palette[view])
+        ax3.bar(x[i] + bar_width + 0.01, test_accs[i], bar_width, label=f'Test ({view_plot_name[i]})',
+                color=palette[view], hatch='//')
 
     # Customize plot
-    ax0.set_xlabel('View')
-    # ax0.set_ylabel('Accuracy (%)')
-    ax0.set_yticklabels([])
-    ax0.spines[['top', 'right']].set_visible(False)
-    ax0.set_title('Last Epoch Test Accuracy')
-    ax0.set_xticks(x + bar_width / 2)
-    ax0.set_xticklabels(view_plot_name)
-    ax0.set_ylim(acc_min, acc_max)
-    # ax0.set_yticks([])
+    ax3.set_xlabel('View')
+    ax3.set_yticklabels([])
+    ax3.spines[['top', 'right']].set_visible(False)
+    ax3.set_title('Last Epoch Test Accuracy')
+    ax3.set_xticks(x + bar_width / 2)
+    short_view_plot_name = ["Fixed", "Extra R.", "Restricted", "Full"]
+    ax3.set_xticklabels(short_view_plot_name)
+    ax3.set_ylim(acc_min, acc_max)
 
     legend_elements = [
         Patch(facecolor='gray', label='ID'),
         Patch(facecolor='gray', hatch='//', label='OOD')
     ]
-    ax0.legend(handles=legend_elements, loc=(-0.5, 1.2), bbox_to_anchor=(1.05, 1), ncols=2)
+    ax3.legend(handles=legend_elements, loc=(0.15, 1.1), ncols=2)
+
+    ax0.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    ax1.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    ax2.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    ax3.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
 
     # save the plot
-    save_path = os.path.join(plot_dir, 'last_epoch_accuracy.png')
-    plt.savefig(save_path)
+    save_path = os.path.join(plot_dir, f'{model_name}_validation_acc_loss.svg')
+    plt.savefig(save_path, format='svg')
     plt.close(fig)
+
+
+def plot_last_epoch_acc():
+    fig, (ax0, ax1, ax3) = plt.subplots(1, 3, figsize=(14, 4))  # slightly reduced height
+    fig.subplots_adjust(top=0.85)
+    fig.delaxes(ax1)  # Remove ax1
+    fig.delaxes(ax3)  # Remove ax2
+
+    # # plot the validation accuracy and loss on the same view images (Figure 1-B)
+    # val_accs = []
+    # test_accs = []
+    # for background in backgrounds:
+    #     for ind_view, view in enumerate(views):
+    #         # get validation results of current model
+    #         log_folder = '_'.join([background, view, res])
+    #         result_path = os.path.join(log_dir, log_folder, '_'.join([model_name, 'log', 'data.pkl']))
+    #         ood_result_path = os.path.join(log_dir, log_folder, '_'.join([model_name, 'test', 'data.pkl']))
+    #         with open(result_path, 'rb') as f:
+    #             result = pickle.load(f)
+    #         with open(ood_result_path, 'rb') as f:
+    #             ood_result = pickle.load(f)
+    #         test_view = test_views[0]
+    #         validation_acc = result['va']
+    #         test_acc = ood_result['tea']
+    #
+    #         last_epoch_validation_acc = validation_acc[view][max_epoch-1]
+    #         last_epoch_test_acc = test_acc[test_view][max_epoch-1]
+    #         val_accs.append(last_epoch_validation_acc)
+    #         test_accs.append(last_epoch_test_acc)
+    #
+    # # plot accuracy as bar plot
+    # # Bar positions
+    # bar_width = 0.35
+    # x = np.arange(len(views))
+    #
+    # # Plot bars
+    # for i, view in enumerate(views):
+    #     ax0.bar(x[i] - 0.01, val_accs[i], bar_width, label=f'Validation ({view_plot_name[i]})', color=palette[view])
+    #     ax0.bar(x[i] + bar_width + 0.01, test_accs[i], bar_width, label=f'Test ({view_plot_name[i]})', color=palette[view], hatch='//')
+    #
+    # # Customize plot
+    # ax0.set_xlabel('View')
+    # ax0.set_yticklabels([])
+    # ax0.spines[['top', 'right']].set_visible(False)
+    # ax0.set_title('Last Epoch Test Accuracy')
+    # ax0.set_xticks(x + bar_width / 2)
+    # short_view_plot_name = ["Fixed", "Extra R.", "Restricted", "Full"]
+    # ax0.set_xticklabels(short_view_plot_name)
+    # ax0.set_ylim(acc_min, acc_max)
+    #
+    # legend_elements = [
+    #     Patch(facecolor='gray', label='ID'),
+    #     Patch(facecolor='gray', hatch='//', label='OOD')
+    # ]
+    # ax0.legend(handles=legend_elements, loc=(-0.5, 1.2), bbox_to_anchor=(1.05, 1), ncols=1)
+    #
+    # # save the plot
+    # save_path = os.path.join(plot_dir, f'{model_name}_last_epoch_accuracy.svg')
+    # plt.savefig(save_path, format='svg')
+    # plt.close(fig)
 
 
 if __name__ == '__main__':

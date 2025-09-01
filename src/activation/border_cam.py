@@ -61,7 +61,8 @@ def border_cam():
             model_name = '_'.join([background, view, res])
             model_folder = os.path.join(model_dir, model_name)
             model_path = os.path.join(model_folder, '_'.join([backbone, 'epoch', str(max_epoch) + '.pth']))
-            model, _ = get_model(backbone, pretrained=False, num_classes=num_classes)
+            general_backbone_name = backbone.split('_')[0]
+            model, _ = get_model(general_backbone_name, pretrained=False, num_classes=num_classes)
             logging.info(f"{model_folder}, Epoch {max_epoch}")
             state_dict = torch.load(model_path, map_location=torch.device(device))
             model.load_state_dict(state_dict)

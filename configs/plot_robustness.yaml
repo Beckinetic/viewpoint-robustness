@@ -1,9 +1,9 @@
 log:
   view:
-    - f
-    - r
-    - er
     - fx
+    - er
+    - r
+    - f
   background:
     - combined
   res: combined
@@ -36,20 +36,20 @@ plot:
   shape_bias_min: 0
   shape_bias_max: 0.26
   palette:
-    f : "#FF1F5B"
-    r: "#00CD6C"
-    er: "#AF58BA"
     fx: "#009ADE"
+    er: "#AF58BA"
+    r: "#00CD6C"
+    f : "#FF1F5B"
   palette_shape_bias:
     shape_and_texture_proportion: "#A0B1BA"
     shape_proportion: "#FFC61E"
     texture_proportion: "#F28522"
     shape_bias: "#AF58BA"
   view:
-    - "Full view"
-    - "Restricted view"
-    - "Extra restricted view"
     - "Fixed view"
+    - "Extra restricted view"
+    - "Restricted view"
+    - "Full view"
   shape_bias_metric:
     - "Shape and Texture Decision Ratio"
     - "Shape Decision Ratio"

@@ -166,8 +166,8 @@ def plot_shape_bias(suffix):
     ax1.set_xticklabels([])
     ax2.set_xticks([])
     ax2.set_xticklabels([])
-    ax1.title.set_text('In-distribution Viewpoint Data')
-    ax2.title.set_text('In-distribution Viewpoint Data')
+    ax1.title.set_text('ID Viewpoints')
+    ax2.title.set_text('ID Viewpoints')
 
     # plot shape bias on viewpoint o.o.d. dataset
     for ind_background, background in enumerate(backgrounds):
@@ -220,8 +220,8 @@ def plot_shape_bias(suffix):
     ax6.set_ylim([shape_bias_min, shape_bias_max])
     ax5.set_xticks([])
     ax5.set_xticklabels([])
-    ax5.title.set_text('OOD Viewpoint Data')
-    ax6.title.set_text('OOD Viewpoint Data')
+    ax5.title.set_text('OOD Viewpoints')
+    ax6.title.set_text('OOD Viewpoints')
 
     # set common labels
     fig.text(0.03, 0.5, 'Shape and Texture Decision Proportions', va='center', rotation='vertical', fontsize=12)
@@ -232,10 +232,22 @@ def plot_shape_bias(suffix):
     ax5.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
     ax6.set_xticks(np.arange(len(backgrounds) * len(views)))
     ax6.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
-    # ax1.set_xticks(np.arange(len(backgrounds) * len(views)))
-    # ax1.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
-    # ax2.set_xticks(np.arange(len(backgrounds) * len(views)))
-    # ax2.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
+
+    # set the spines
+    ax1.spines[['top', 'right']].set_visible(False)
+    ax2.spines[['top', 'right']].set_visible(False)
+    ax5.spines[['top', 'right']].set_visible(False)
+    ax6.spines[['top', 'right']].set_visible(False)
+
+    # # set the grids
+    # ax1.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    # ax2.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    # ax5.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    # ax6.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+
+    # Add horizontal line at 1/32 to show chance level
+    ax1.axhline(y=1/32, color='black', linestyle='--', linewidth=1, zorder=0)
+    ax5.axhline(y=1/32, color='black', linestyle='--', linewidth=1, zorder=0)
 
     # create color legend
     color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
@@ -243,8 +255,8 @@ def plot_shape_bias(suffix):
     ax6.legend(color_legend, shape_bias_metric, loc=(-1.5, 2.35), ncols=3)
 
     # save the plot
-    save_path = os.path.join(plot_dir, 'shape_bias.png')
-    plt.savefig(save_path)
+    save_path = os.path.join(plot_dir, f'{model_name}_shape_bias.svg')
+    plt.savefig(save_path, format='svg')
     plt.close(fig)
 
 
