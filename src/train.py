@@ -46,6 +46,8 @@ pretrained = config['model']['pretrained']
 epochs = config['model']['epochs']
 checkpoint = config['model']['checkpoint']
 
+instance = config['model']['instance']
+
 optimizer_name = config['optimizer']['optimizer_name']
 learning_rate = config['optimizer']['learning_rate']
 weight_decay = config['optimizer']['weight_decay']
@@ -84,8 +86,8 @@ def train(data_folder, train_dataset, val_datasets):
     for val_ind, key in enumerate(val_datasets):
         val_dataloader = DataLoader(val_datasets[key], batch_size=val_batch_size, shuffle=False)
         val_dataloaders[key] = val_dataloader
-    logging.info(f'Train dataset size: {len(train_dataset)}')
-    logging.info(f'Val dataset number: {len(val_datasets)}')
+    tqdm.write(f'Train dataset size: {len(train_dataset)}')
+    tqdm.write(f'Val dataset number: {len(val_datasets)}')
 
     # model
     model, _ = get_model(backbone, pretrained=pretrained, num_classes=train_num_classes)
@@ -93,7 +95,7 @@ def train(data_folder, train_dataset, val_datasets):
 
     # device
     device = get_device()
-    print(f'Device: {device}')
+    tqdm.write(f'Device: {device}')
     model = model.to(device)
 
     # optimizer
@@ -111,7 +113,7 @@ def train(data_folder, train_dataset, val_datasets):
         is_pretrained = 'pretrained'
     else:
         is_pretrained = 'scratch'
-    untrained_model_path = f"{model_dir}/{data_folder}/{backbone}_{is_pretrained}_epoch_0.pth"
+    untrained_model_path = f"{model_dir}/{data_folder}/{backbone}_{is_pretrained}_instance{instance}_epoch_0.pth"
     os.makedirs(os.path.dirname(untrained_model_path), exist_ok=True)
     torch.save(model.state_dict(), untrained_model_path)
 
@@ -172,26 +174,14 @@ def train(data_folder, train_dataset, val_datasets):
         # run scheduler
         scheduler.step()
 
-        # Early stopping logic
-        # current_val_loss = sum([val_losses[key][-1] for key in val_losses]) / len(val_losses)
-        # if current_val_loss < best_val_loss:
-        #     best_val_loss = current_val_loss
-        #     trigger_times = 0
-        # else:
-        #     trigger_times += 1
-        #     if trigger_times >= patience:
-        #         print(f"Early stopping triggered after {epoch + 1} epochs.")
-        #         # Optionally, save the best model checkpoint here if needed.
-        #         break
-
         # save checkpoints
         if (epoch + 1) % checkpoint == 0:
-            checkpoint_path = f"{model_dir}/{data_folder}/{backbone}_{is_pretrained}_epoch_{epoch + 1}.pth"
+            checkpoint_path = f"{model_dir}/{data_folder}/{backbone}_{is_pretrained}_instance{instance}_epoch_{epoch + 1}.pth"
             os.makedirs(os.path.dirname(checkpoint_path), exist_ok=True)
             torch.save(model.state_dict(), checkpoint_path)
 
         # save logs
-        log_path = f"{log_dir}/{data_folder}/loss_acc_log/{backbone}_{is_pretrained}_log_epoch_{epoch + 1}.txt"
+        log_path = f"{log_dir}/{data_folder}/loss_acc_log/{backbone}_{is_pretrained}_instance{instance}_log_epoch_{epoch + 1}.txt"
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
         with open(log_path, 'w') as log_file:
             log_file.write(f"Epoch {epoch + 1}, Train Loss: {train_loss}\n")
@@ -201,11 +191,11 @@ def train(data_folder, train_dataset, val_datasets):
                 log_file.write(f"Epoch {epoch + 1}, Validation {val_ind} Accuracy: {val_accs[key][epoch]}\n")
 
         # print log
-        logging.info(f"Epoch {epoch + 1}, Train Loss: {train_loss}\n")
-        logging.info(f"Epoch {epoch + 1}, Train Accuracy: {100 * train_correct / total}\n")
+        tqdm.write(f"Epoch {epoch + 1}, Train Loss: {train_loss}\n")
+        tqdm.write(f"Epoch {epoch + 1}, Train Accuracy: {100 * train_correct / total}\n")
         for val_ind, key in enumerate(val_dataloaders):
-            logging.info(f"Epoch {epoch + 1}, Validation {val_ind} Loss: {val_losses[key][epoch]}\n")
-            logging.info(f"Epoch {epoch + 1}, Validation {val_ind} Accuracy: {val_accs[key][epoch]}\n")
+            tqdm.write(f"Epoch {epoch + 1}, Validation {val_ind} Loss: {val_losses[key][epoch]}\n")
+            tqdm.write(f"Epoch {epoch + 1}, Validation {val_ind} Accuracy: {val_accs[key][epoch]}\n")
 
     # save congregated loss and acc data
     log_data_dict = {
@@ -214,7 +204,7 @@ def train(data_folder, train_dataset, val_datasets):
         'ta': train_accs,
         'va': val_accs
     }
-    log_data_dict_path = f"{log_dir}/{data_folder}/{backbone}_{is_pretrained}_log_data.pkl"
+    log_data_dict_path = f"{log_dir}/{data_folder}/{backbone}_{is_pretrained}_instance{instance}_log_data.pkl"
     with open(log_data_dict_path, 'wb') as f:
         pickle.dump(log_data_dict, f)
 

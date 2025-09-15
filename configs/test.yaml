@@ -16,7 +16,7 @@ data:
       - industrial
 
 model:
-  backbone: resnet18_pretrained
+  backbone: resnet18_scratch
   to_test:
     view:
       - f
