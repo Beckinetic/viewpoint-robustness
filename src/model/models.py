@@ -109,7 +109,7 @@ def get_scheduler(scheduler_name, optimizer, **kwargs):
 def get_device(device=None):
     if device is None:
         if torch.cuda.is_available():
-            return torch.device('cuda:1')
+            return torch.device('cuda')
         elif torch.backends.mps.is_available():
             return torch.device('mps')
         else:
