@@ -1,6 +1,6 @@
 data:
   train:
-    batch_size: 512
+    batch_size: 32
     num_classes: 32
     view:
       - f

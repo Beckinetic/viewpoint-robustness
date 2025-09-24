@@ -70,13 +70,14 @@ def plot_train_acc_loss():
 
             # plot accuracy
             ax1.plot(epochs, train_acc, color=palette[view])
-            ax1.set_xlabel('Epoch')
+            ax1.set_xlabel('Training Epoch')
             ax1.set_ylabel('Accuracy (%)')
             ax1.spines[['top', 'right']].set_visible(False)
             ax1.set_ylim([acc_min, acc_max])
             ax1.set_title("Training Accuracy")
 
-            ax1.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+            ax1.grid(visible=False)
+            # ax1.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
 
             # create color legend
             color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
@@ -112,7 +113,7 @@ def plot_val_acc_loss():
 
             # plot accuracy
             ax0.plot(epochs, train_acc, color=palette[view])
-            ax0.set_xlabel('Epoch')
+            ax0.set_xlabel('Training Epoch')
             ax0.set_ylabel('Accuracy (%)\nClean images', fontsize=12)
             ax0.set_ylim([acc_min, acc_max])
             ax0.set_title("Training Accuracy")
@@ -133,7 +134,7 @@ def plot_val_acc_loss():
 
             # plot accuracy
             ax1.plot(epochs, validation_acc, color=palette[view], linewidth=2)
-            ax1.set_xlabel('Epoch')
+            ax1.set_xlabel('Training Epoch')
             ax1.set_yticklabels([])
             ax1.set_ylim([acc_min, acc_max])
             ax1.spines[['top', 'right']].set_visible(False)
@@ -155,7 +156,7 @@ def plot_val_acc_loss():
 
                 # plot accuracy
                 ax2.plot(epochs, test_acc, color=palette[view], linewidth=2)
-                ax2.set_xlabel('Epoch')
+                ax2.set_xlabel('Training Epoch')
                 ax2.set_ylim([acc_min, acc_max])
                 ax2.set_yticklabels([])
                 ax2.spines[['top', 'right']].set_visible(False)
@@ -195,9 +196,25 @@ def plot_val_acc_loss():
 
     # Plot bars
     for i, view in enumerate(views):
-        ax3.bar(x[i] - 0.01, val_accs[i], bar_width, label=f'Validation ({view_plot_name[i]})', color=palette[view])
-        ax3.bar(x[i] + bar_width + 0.01, test_accs[i], bar_width, label=f'Test ({view_plot_name[i]})',
-                color=palette[view], hatch='//')
+        # ID (validation) — outline only
+        ax3.bar(
+            x[i] - 0.01,
+            val_accs[i],
+            bar_width,
+            label=f'Validation ({view_plot_name[i]})',
+            color='none',
+            edgecolor=palette[view],
+            linewidth=1.8
+        )
+        # OOD (test) — solid fill
+        ax3.bar(
+            x[i] + bar_width + 0.01,
+            test_accs[i],
+            bar_width,
+            label=f'Test ({view_plot_name[i]})',
+            color=palette[view]
+        )
+
 
     # Customize plot
     ax3.set_xlabel('View')
@@ -210,15 +227,23 @@ def plot_val_acc_loss():
     ax3.set_ylim(acc_min, acc_max)
 
     legend_elements = [
-        Patch(facecolor='gray', label='ID'),
-        Patch(facecolor='gray', hatch='//', label='OOD')
+        Patch(facecolor='none', edgecolor='gray', linewidth=1.8, label='ID'),
+        Patch(facecolor='gray', edgecolor='gray', label='OOD')
     ]
     ax3.legend(handles=legend_elements, loc=(0.15, 1.1), ncols=2)
 
-    ax0.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
-    ax1.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
-    ax2.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
-    ax3.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    # ax0.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    # ax1.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    # ax2.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    # ax3.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    ax0.grid(visible=False)
+    ax1.grid(visible=False)
+    ax2.grid(visible=False)
+    ax3.grid(visible=False)
+    # Add chance-level (1/32 ≈ 3.125%) reference line to all subplots
+    chance_acc = 100.0 / 32.0  # convert to percentage for y-axis
+    for ax in (ax0, ax1, ax2, ax3):
+        ax.axhline(y=chance_acc, linestyle='--', linewidth=1, color='gray', alpha=0.7, zorder=0)
 
     # save the plot
     save_path = os.path.join(plot_dir, f'{model_name}_validation_acc_loss.svg')
