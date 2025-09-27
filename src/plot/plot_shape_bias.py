@@ -7,7 +7,7 @@ import yaml
 from matplotlib import pyplot as plt, lines
 import seaborn as sns
 import numpy as np
-from statannotations.Annotator import Annotator
+# from statannotations.Annotator import Annotator
 
 from src.static import category_labels
 
@@ -105,8 +105,8 @@ def get_standard_errors(shape_decisions, texture_decisions, all_decisions):
 def plot_shape_bias(suffix):
     # plot for the decision proportions and shape bias (Figure 2)
     fig, axes = plt.subplots(2, 2, figsize=(7, 7))
-    ax1, ax2, ax5, ax6 = axes.flatten()
-    fig.subplots_adjust(wspace=0.4)
+    ax1, ax2, ax3, ax4 = axes.flatten()
+    fig.subplots_adjust(wspace=0.4, hspace=0.3)
     width_factor_decisions = 0.9
     width_factor_shape_bias = 0.8
 
@@ -155,19 +155,15 @@ def plot_shape_bias(suffix):
                     color=palette_shape_bias['texture_proportion'],
                     zorder=1)
 
-            ax2.bar(ind_flattened, shape_bias, width=bar_width * (1/width_factor_shape_bias), yerr=shape_bias_se,
+            ax3.bar(ind_flattened, shape_bias, width=bar_width * (1/width_factor_shape_bias), yerr=shape_bias_se,
                     label='Shape Bias', color=palette_shape_bias['shape_bias'],
                     zorder=1)
 
     # ax1 and ax2 settings
     ax1.set_ylim([decision_proportion_min, decision_proportion_max])
-    ax2.set_ylim([shape_bias_min, shape_bias_max])
-    ax1.set_xticks([])
-    ax1.set_xticklabels([])
-    ax2.set_xticks([])
-    ax2.set_xticklabels([])
-    ax1.title.set_text('ID Viewpoints')
-    ax2.title.set_text('ID Viewpoints')
+    ax3.set_ylim([shape_bias_min, shape_bias_max])
+    ax1.title.set_text('IDV')
+    ax3.title.set_text('IDV')
 
     # plot shape bias on viewpoint o.o.d. dataset
     for ind_background, background in enumerate(backgrounds):
@@ -192,7 +188,7 @@ def plot_shape_bias(suffix):
             shape_and_texture_decisions_se, shape_decisions_se, texture_decisions_se, shape_bias_se = (
                 get_standard_errors(shape_decisions, texture_decisions, all_decisions))
 
-            print(f"Shape bias of {view} (OOD): {shape_bias}")
+            print(f"Shape bias of {view} (HOV): {shape_bias}")
             # plot the decision proportions and shape bias
             # set up bar width and positions
             bar_width = 0.2
@@ -200,59 +196,66 @@ def plot_shape_bias(suffix):
             # set a flattened index
             ind_flattened = ind_background * len(view) + ind_view
 
-            ax5.bar(ind_flattened - 0.5 * bar_width * (1 / width_factor_decisions), shape_decision_proportion,
+            ax2.bar(ind_flattened - 0.5 * bar_width * (1 / width_factor_decisions), shape_decision_proportion,
                     yerr=shape_decisions_se,
                     width=bar_width,
                     label='Texture Decision Proportion',
                     color=palette_shape_bias['shape_proportion'],
                     zorder=1)
-            ax5.bar(ind_flattened + 0.5 * bar_width * (1 / width_factor_decisions), texture_decision_proportion,
+            ax2.bar(ind_flattened + 0.5 * bar_width * (1 / width_factor_decisions), texture_decision_proportion,
                     yerr=texture_decisions_se,
                     width=bar_width,
                     label='Shape Decision Proportion',
                     color=palette_shape_bias['texture_proportion'],
                     zorder=1)
 
-            ax6.bar(ind_flattened, shape_bias, width=bar_width * (1 / width_factor_shape_bias), yerr=shape_bias_se,
+            ax4.bar(ind_flattened, shape_bias, width=bar_width * (1 / width_factor_shape_bias), yerr=shape_bias_se,
                     label='Shape Bias', color=palette_shape_bias['shape_bias'], zorder=1)
 
-    ax5.set_ylim([decision_proportion_min, decision_proportion_max])
-    ax6.set_ylim([shape_bias_min, shape_bias_max])
-    ax5.set_xticks([])
-    ax5.set_xticklabels([])
-    ax5.title.set_text('OOD Viewpoints')
-    ax6.title.set_text('OOD Viewpoints')
+    ax2.set_ylim([decision_proportion_min, decision_proportion_max])
+    ax4.set_ylim([shape_bias_min, shape_bias_max])
+    ax2.title.set_text('HOV')
+    ax4.title.set_text('HOV')
 
     # set common labels
-    fig.text(0.03, 0.5, 'Shape and Texture Decision Proportions', va='center', rotation='vertical', fontsize=12)
-    fig.text(0.49, 0.5, 'Shape Bias', va='center', rotation='vertical', fontsize=12)
+    fig.text(0.2, 0.95 , 'Shape and Texture Decision Proportions', va='center', rotation='horizontal', fontsize=12)
+    fig.text(0.45, 0.5, 'Shape Bias', va='center', rotation='horizontal', fontsize=12)
 
-    # set ticks for decisions
-    ax5.set_xticks(np.arange(len(backgrounds) * len(views)))
-    ax5.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
-    ax6.set_xticks(np.arange(len(backgrounds) * len(views)))
-    ax6.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
+    # set ticks for everyone
+    ax1.set_xticks(np.arange(len(backgrounds) * len(views)))
+    ax1.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
+    ax2.set_xticks(np.arange(len(backgrounds) * len(views)))
+    ax2.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
+    ax3.set_xticks(np.arange(len(backgrounds) * len(views)))
+    ax3.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
+    ax4.set_xticks(np.arange(len(backgrounds) * len(views)))
+    ax4.set_xticklabels([item.rsplit(' ', 1)[0] for item in view_plot_name])
 
     # set the spines
     ax1.spines[['top', 'right']].set_visible(False)
     ax2.spines[['top', 'right']].set_visible(False)
-    ax5.spines[['top', 'right']].set_visible(False)
-    ax6.spines[['top', 'right']].set_visible(False)
+    ax3.spines[['top', 'right']].set_visible(False)
+    ax4.spines[['top', 'right']].set_visible(False)
 
     # # set the grids
     # ax1.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
     # ax2.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
-    # ax5.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
-    # ax6.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    # ax3.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+    # ax4.grid(visible=True, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
 
     # Add horizontal line at 1/32 to show chance level
-    ax1.axhline(y=1/32, color='black', linestyle='--', linewidth=1, zorder=0)
-    ax5.axhline(y=1/32, color='black', linestyle='--', linewidth=1, zorder=0)
+    ax1.axhline(y=1/32, color='gray', linestyle='--', linewidth=1, zorder=0, alpha=0.7)
+    ax2.axhline(y=1/32, color='gray', linestyle='--', linewidth=1, zorder=0, alpha=0.7)
+    ax3.axhline(y=1/2, color='gray', linestyle='--', linewidth=1, zorder=0, alpha=0.7)
+    ax4.axhline(y=1/2, color='gray', linestyle='--', linewidth=1, zorder=0, alpha=0.7)
 
     # create color legend
-    color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
-                    for color in palette_shape_bias.values()]
-    ax6.legend(color_legend, shape_bias_metric, loc=(-1.5, 2.35), ncols=3)
+    color_legend_left = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
+                    for color in [palette_shape_bias['texture_proportion'], palette_shape_bias['shape_proportion']]]
+    color_legend_right = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
+                    for color in [palette_shape_bias['shape_bias']]]
+    ax2.legend(color_legend_left, ['Texture Decision Proportion', 'Shape Decision Proportion'])
+    ax4.legend(color_legend_right, ['Shape Bias'])
 
     # save the plot
     save_path = os.path.join(plot_dir, f'{model_name}_shape_bias.svg')
@@ -340,12 +343,12 @@ def plot_shape_bias_comparison():
                      marker='o', ax=ax, color='grey', alpha=0.3, legend=False)
 
         # Statistical annotations
-        pairs = [(views[i], views[j]) for i in range(len(views))
-                 for j in range(i + 1, len(views))]
-        annotator = Annotator(ax, pairs, data=df_shape_bias[df_shape_bias['Dataset'] == dataset_type], x='View',
-                              y='Shape Bias')
-        annotator.configure(test='t-test_ind', text_format='star', comparisons_correction='bonferroni')
-        annotator.apply_and_annotate()
+        # pairs = [(views[i], views[j]) for i in range(len(views))
+        #          for j in range(i + 1, len(views))]
+        # annotator = Annotator(ax, pairs, data=df_shape_bias[df_shape_bias['Dataset'] == dataset_type], x='View',
+        #                       y='Shape Bias')
+        # annotator.configure(test='t-test_ind', text_format='star', comparisons_correction='bonferroni')
+        # annotator.apply_and_annotate()
 
         # Customize plot
         plt.ylim(0, 1)

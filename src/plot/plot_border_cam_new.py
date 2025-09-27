@@ -225,7 +225,7 @@ ax3.yaxis.set_major_locator(MaxNLocator(nbins=6))
 
 ax1.set_ylabel('CAM / OBNC Value')
 ax1.set_title('Object')
-ax2.set_title('Edge')
+ax2.set_title('Border')
 ax3.set_title('Background')
 
 fig.patch.set_alpha(0)
@@ -239,9 +239,13 @@ ax2.spines[['top', 'right']].set_visible(False)
 ax3.spines[['top', 'right']].set_visible(False)
 ax4.spines[['top', 'right']].set_visible(False)
 
-ax1.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
-ax2.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
-ax3.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+# ax1.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+# ax2.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+# ax3.grid(visible=False, linestyle='--', linewidth=0.5, color='gray', alpha=0.6)
+ax1.grid(visible=False)
+ax2.grid(visible=False)
+ax3.grid(visible=False)
+ax4.grid(visible=False)
 
 for ax in [ax1, ax2, ax3, ax4]:
     for spine in ax.spines.values():

@@ -138,7 +138,7 @@ def plot_val_acc_loss():
             ax1.set_yticklabels([])
             ax1.set_ylim([acc_min, acc_max])
             ax1.spines[['top', 'right']].set_visible(False)
-            ax1.set_title("Test Accuracy on ID Viewpoints")
+            ax1.set_title("Test Accuracy on IDV")
 
     # plot the accuracy and loss when tested on viewpoint o.o.d. test set
     for background in backgrounds:
@@ -160,7 +160,7 @@ def plot_val_acc_loss():
                 ax2.set_ylim([acc_min, acc_max])
                 ax2.set_yticklabels([])
                 ax2.spines[['top', 'right']].set_visible(False)
-                ax2.set_title("Testing Accuracy on OOD Viewpoints")
+                ax2.set_title("Testing Accuracy on HOV")
 
             # create color legend
             color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
@@ -227,8 +227,8 @@ def plot_val_acc_loss():
     ax3.set_ylim(acc_min, acc_max)
 
     legend_elements = [
-        Patch(facecolor='none', edgecolor='gray', linewidth=1.8, label='ID'),
-        Patch(facecolor='gray', edgecolor='gray', label='OOD')
+        Patch(facecolor='none', edgecolor='gray', linewidth=1.8, label='IDV'),
+        Patch(facecolor='gray', edgecolor='gray', label='HOV')
     ]
     ax3.legend(handles=legend_elements, loc=(0.15, 1.1), ncols=2)
 
