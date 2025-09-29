@@ -186,7 +186,7 @@ for data_label, style_kwargs in {
 # Ticks and labels use the categorical names
 ax4.set_xticks(range(len(order)))
 ax4.set_xticklabels(order)
-ax4.set_title('Obj.–Back. Contrast')
+ax4.set_title('Obj.–Back. Ratio')
 ax4.set_xlabel('View')
 # ax4.set_ylabel('OBNC')
 ax4.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
@@ -223,7 +223,8 @@ ax1.yaxis.set_major_locator(MaxNLocator(nbins=6))
 ax2.yaxis.set_major_locator(MaxNLocator(nbins=6))
 ax3.yaxis.set_major_locator(MaxNLocator(nbins=6))
 
-ax1.set_ylabel('CAM / OBNC Value')
+ax1.set_ylabel('CAM Value')
+ax4.set_ylabel('OBR Value')
 ax1.set_title('Object')
 ax2.set_title('Border')
 ax3.set_title('Background')
@@ -246,6 +247,10 @@ ax1.grid(visible=False)
 ax2.grid(visible=False)
 ax3.grid(visible=False)
 ax4.grid(visible=False)
+
+for ax in [ax1, ax2, ax3, ax4]:
+    ax.tick_params(axis="x", which="both", bottom=True, top=False, length=3, width=1, color="black")
+    ax.tick_params(axis="y", which="both", left=True, right=False, length=3, width=1, color="black")
 
 for ax in [ax1, ax2, ax3, ax4]:
     for spine in ax.spines.values():

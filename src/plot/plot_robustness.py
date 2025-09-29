@@ -92,7 +92,7 @@ def plot_robustness():
             ax1.spines[['top', 'right']].set_visible(False)
             ax1.set_xticks(severities)
             ax1.set_ylim(acc_min, acc_max)
-            ax1.title.set_text('Accuracy on Corrupted Images (IDV)')
+            ax1.title.set_text('IDV')
 
     for ind_background, background in enumerate(backgrounds):
         for ind_view, view in enumerate(views):
@@ -126,7 +126,7 @@ def plot_robustness():
             ax3.set_xticks(severities)
             ax3.set_yticklabels([])
             ax3.set_ylim(acc_min, acc_max)
-            ax3.title.set_text('Accuracy on Corrupted Images (HOV)')
+            ax3.title.set_text('HOV')
             ax3.spines[['top', 'right']].set_visible(False)
 
             color_legend = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)

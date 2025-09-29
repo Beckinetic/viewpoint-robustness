@@ -104,7 +104,7 @@ def get_standard_errors(shape_decisions, texture_decisions, all_decisions):
 
 def plot_shape_bias(suffix):
     # plot for the decision proportions and shape bias (Figure 2)
-    fig, axes = plt.subplots(2, 2, figsize=(7, 7))
+    fig, axes = plt.subplots(1, 4, figsize=(14, 4))
     ax1, ax2, ax3, ax4 = axes.flatten()
     fig.subplots_adjust(wspace=0.4, hspace=0.3)
     width_factor_decisions = 0.9
@@ -254,7 +254,7 @@ def plot_shape_bias(suffix):
                     for color in [palette_shape_bias['texture_proportion'], palette_shape_bias['shape_proportion']]]
     color_legend_right = [lines.Line2D([], [], color=color, marker='o', linestyle='None', markersize=8)
                     for color in [palette_shape_bias['shape_bias']]]
-    ax2.legend(color_legend_left, ['Texture Decision Proportion', 'Shape Decision Proportion'])
+    ax2.legend(color_legend_left, ['Texture Decision Proportion', 'Shape Decision Proportion'], ncol=2,)
     ax4.legend(color_legend_right, ['Shape Bias'])
 
     # save the plot
