@@ -47,6 +47,7 @@ epochs = config['model']['epochs']
 checkpoint = config['model']['checkpoint']
 
 instance = config['model']['instance']
+print(f"Now training instance: {instance}")
 
 optimizer_name = config['optimizer']['optimizer_name']
 learning_rate = config['optimizer']['learning_rate']
