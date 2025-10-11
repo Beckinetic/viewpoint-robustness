@@ -35,7 +35,7 @@ model:
   pretrained: false
   epochs: 30
   checkpoint: 1
-  instance: 5
+  instance: 1
 
 optimizer:
   optimizer_name: SGD
