@@ -39,7 +39,7 @@ test_backgrounds = config['data']['test']['background']
 backbone = config['model']['backbone']
 pretrained = config['model']['pretrained']
 instance = config['model']['instance']
-print(f"Now training instance: {instance}")
+print(f"Now testing instance: {instance}")
 
 to_test_views = config['model']['to_test']['view']
 to_test_res = config['model']['to_test']['res']
