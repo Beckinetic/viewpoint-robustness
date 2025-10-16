@@ -37,6 +37,10 @@ test_res = config['data']['test']['res']
 test_backgrounds = config['data']['test']['background']
 
 backbone = config['model']['backbone']
+pretrained = config['model']['pretrained']
+instance = config['model']['instance']
+print(f"Now training instance: {instance}")
+
 to_test_views = config['model']['to_test']['view']
 to_test_res = config['model']['to_test']['res']
 to_test_backgrounds = config['model']['to_test']['background']
@@ -91,7 +95,14 @@ def test():
                 # find model folder and load result
                 model_name = '_'.join([background, view, res])
                 model_folder = os.path.join(model_dir, model_name)
-                result_path = os.path.join(log_dir, model_name, '_'.join([backbone, 'test', 'data.pkl']))
+                # save untrained model as baseline
+                if pretrained:
+                    is_pretrained = 'pretrained'
+                else:
+                    is_pretrained = 'scratch'
+                result_path = os.path.join(log_dir, model_name, '_'.join([backbone, is_pretrained,
+                                                                          'instance'+str(instance),
+                                                                          'test', 'data.pkl']))
 
                 # validation results and test results are stored together
                 test_losses = {}
@@ -102,11 +113,13 @@ def test():
 
                 # load the model backbone
                 general_backbone_name = backbone.split('_')[0]
-                model, _ = get_model(general_backbone_name, pretrained=False, num_classes=num_classes)
+                model, _ = get_model(general_backbone_name, pretrained=pretrained, num_classes=num_classes)
                 model.to(device)
 
                 for epoch in tqdm(range(max_epoch + 1), desc=f'Model {view}'):
-                    model_path = os.path.join(model_folder, '_'.join([backbone, 'epoch', str(epoch) + '.pth']))
+                    model_path = os.path.join(model_folder, '_'.join([backbone, is_pretrained,
+                                                                      'instance'+str(instance),
+                                                                      'epoch', str(epoch) + '.pth']))
                     state_dict = torch.load(model_path, map_location=torch.device(device))
                     model.load_state_dict(state_dict)
                     model.eval()
