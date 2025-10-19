@@ -18,7 +18,7 @@ data:
 model:
   backbone: resnet18
   pretrained: false
-  instance: 4
+  instance: 5
   to_test:
     view:
       - f
